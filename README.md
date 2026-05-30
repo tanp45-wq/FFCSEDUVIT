@@ -24,3 +24,4 @@ Just open `index.html` in any browser. No server needed.
 
 ## Deploy
 See deployment steps in the chat or push to GitHub → import to Vercel.
+# FFCSEDUVIT
