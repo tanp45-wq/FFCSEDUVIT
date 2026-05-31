@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FFCS On The Go - Vellore Campus</title>
@@ -553,10 +554,97 @@
           <button class="btn-add" id="btn-add" onclick="processCourseCommit()"><i class="fa-solid fa-plus"></i> Bind Entry</button>
           <button class="btn-clear-form" onclick="clearFormInputFields()">Clear Fields</button>
         </div>
+=======
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduHub VIT — Your All-in-One Academic Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Satoshi:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursor-trail"></div>
+
+<!-- NOISE OVERLAY -->
+<div class="noise"></div>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" onclick="showSection('home')">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">EduHub<span class="logo-vit">VIT</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#" class="nav-link" onclick="showSection('ffcs')"><span>01</span>FFCS</a>
+      <a href="#" class="nav-link" onclick="showSection('cgpa')"><span>02</span>CGPA</a>
+      <a href="#" class="nav-link" onclick="showSection('nptel')"><span>03</span>NPTEL</a>
+      <a href="#" class="nav-link" onclick="showSection('pyq')"><span>04</span>PYQ Papers</a>
+    </div>
+    <button class="nav-menu-btn" id="nav-menu-btn"><i class="fa-solid fa-bars"></i></button>
+  </div>
+</nav>
+
+<!-- ═══ HOME ═══ -->
+<section class="section active" id="sec-home">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-orb orb1"></div>
+    <div class="hero-orb orb2"></div>
+    <div class="hero-orb orb3"></div>
+    <div class="hero-inner">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        VIT Vellore Student Portal
+      </div>
+      <h1 class="hero-h1">
+        Everything You Need<br>
+        <em>In One Place.</em>
+      </h1>
+      <p class="hero-p">Plan your FFCS, track your CGPA, prep for NPTEL and access 1500+ PYQ papers — all in one seamless platform built for VIT students.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showSection('ffcs')">Start Planning <i class="fa-solid fa-arrow-right"></i></button>
+        <button class="btn-ghost" onclick="showSection('pyq')">Browse Papers</button>
+      </div>
+      <div class="hero-chips">
+        <span class="chip"><i class="fa-solid fa-bolt"></i> No login required</span>
+        <span class="chip"><i class="fa-solid fa-lock"></i> Data stays on device</span>
+        <span class="chip"><i class="fa-solid fa-infinity"></i> Always free</span>
+      </div>
+    </div>
+    <div class="hero-cards-float">
+      <div class="hcard hc1" onclick="showSection('ffcs')">
+        <div class="hcard-icon">📅</div>
+        <div class="hcard-label">FFCS Planner</div>
+        <div class="hcard-sub">Click cell → Add course</div>
+      </div>
+      <div class="hcard hc2" onclick="showSection('cgpa')">
+        <div class="hcard-icon">📊</div>
+        <div class="hcard-label">CGPA Calculator</div>
+        <div class="hcard-sub">GPA / CGPA / Grade</div>
+      </div>
+      <div class="hcard hc3" onclick="showSection('nptel')">
+        <div class="hcard-icon">🎓</div>
+        <div class="hcard-label">NPTEL Practice</div>
+        <div class="hcard-sub">25 courses · 3200+ MCQs</div>
+      </div>
+      <div class="hcard hc4" onclick="showSection('pyq')">
+        <div class="hcard-icon">📄</div>
+        <div class="hcard-label">PYQ Papers</div>
+        <div class="hcard-sub">1500+ CAT · FAT papers</div>
+>>>>>>> fcc9f38 (first commit)
       </div>
     </div>
   </div>
 
+<<<<<<< HEAD
   <!-- Operational Configuration Bar Container -->
   <div class="action-bar">
     <div class="action-left">
@@ -1049,5 +1137,404 @@
       }, 4000);
     }
   </script>
+=======
+  <!-- STATS MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span>FFCS Planner</span><span class="sep">✦</span>
+      <span>1500+ Papers</span><span class="sep">✦</span>
+      <span>3200+ NPTEL MCQs</span><span class="sep">✦</span>
+      <span>CGPA Calculator</span><span class="sep">✦</span>
+      <span>No Sign-up</span><span class="sep">✦</span>
+      <span>25 NPTEL Courses</span><span class="sep">✦</span>
+      <span>VIT Vellore</span><span class="sep">✦</span>
+      <span>CAT1 · CAT2 · FAT</span><span class="sep">✦</span>
+      <!-- duplicate for seamless loop -->
+      <span>FFCS Planner</span><span class="sep">✦</span>
+      <span>1500+ Papers</span><span class="sep">✦</span>
+      <span>3200+ NPTEL MCQs</span><span class="sep">✦</span>
+      <span>CGPA Calculator</span><span class="sep">✦</span>
+      <span>No Sign-up</span><span class="sep">✦</span>
+      <span>25 NPTEL Courses</span><span class="sep">✦</span>
+      <span>VIT Vellore</span><span class="sep">✦</span>
+      <span>CAT1 · CAT2 · FAT</span><span class="sep">✦</span>
+    </div>
+  </div>
+
+  <!-- TOOL GRID -->
+  <div class="tools-grid-section">
+    <h2 class="section-h2">Pick Your Tool</h2>
+    <div class="tools-grid">
+      <div class="tool-card tc-ffcs" onclick="showSection('ffcs')">
+        <div class="tc-num">01</div>
+        <div class="tc-icon"><i class="fa-solid fa-table-cells"></i></div>
+        <h3>FFCS Planner</h3>
+        <p>Click any timetable cell to add your course. Auto conflict detection, quick view mode, CSV export.</p>
+        <div class="tc-tags"><span>Vellore Campus</span><span>All Slots</span><span>localStorage</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+      <div class="tool-card tc-cgpa" onclick="showSection('cgpa')">
+        <div class="tc-num">02</div>
+        <div class="tc-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>CGPA Calculator</h3>
+        <p>Calculate your GPA per semester, cumulative CGPA, required grade targets and grade predictor.</p>
+        <div class="tc-tags"><span>GPA</span><span>CGPA</span><span>Grade Predictor</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+      <div class="tool-card tc-nptel" onclick="showSection('nptel')">
+        <div class="tc-num">03</div>
+        <div class="tc-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <h3>NPTEL Practice</h3>
+        <p>25 courses, 3200+ verified MCQs organised by week. Practice mode and full quiz mode available.</p>
+        <div class="tc-tags"><span>25 Courses</span><span>3200+ MCQs</span><span>Apr 2026</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+      <div class="tool-card tc-pyq" onclick="showSection('pyq')">
+        <div class="tc-num">04</div>
+        <div class="tc-icon"><i class="fa-solid fa-file-lines"></i></div>
+        <h3>PYQ Papers</h3>
+        <p>1500+ previous year question papers for CAT1, CAT2 and FAT. Filter by subject, slot, year, exam type.</p>
+        <div class="tc-tags"><span>CAT1</span><span>CAT2</span><span>FAT</span><span>1500+</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══ FFCS ═══ -->
+<section class="section" id="sec-ffcs">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge ffcs-badge">01</span>
+      <h2>FFCS Planner <span class="campus-chip">Vellore Campus</span></h2>
+    </div>
+    <div class="tool-actions">
+      <button class="tact-btn" id="btn-quickvis"><i class="fa-regular fa-eye"></i> Quick View</button>
+      <button class="tact-btn tact-green" id="btn-download-tt"><i class="fa-solid fa-download"></i> Download</button>
+      <button class="tact-btn tact-red" id="btn-reset"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+    </div>
+  </div>
+
+  <div class="ffcs-hint"><i class="fa-solid fa-hand-pointer"></i> Click any cell to add a course · Double-click a filled cell to edit</div>
+
+  <div class="timetable-wrap">
+    <div class="timetable-scroll"><table id="timetable" class="timetable"></table></div>
+    <div class="tt-legend">
+      <span><span class="ld theory"></span> Theory hours</span>
+      <span><span class="ld lab"></span> Lab hours</span>
+      <span><span class="ld filled"></span> Course added</span>
+    </div>
+  </div>
+
+  <div class="course-list-wrap">
+    <div class="cl-header">
+      <h3>Selected Courses</h3>
+      <span class="credit-badge" id="credit-badge">0 Credits</span>
+    </div>
+    <div class="cl-scroll">
+      <table class="cl-table">
+        <thead><tr><th>Slot</th><th>Code</th><th>Title</th><th>Faculty</th><th>Venue</th><th>Credits</th><th></th></tr></thead>
+        <tbody id="cl-body"></tbody>
+        <tfoot><tr><td colspan="7" class="cl-total">Total Credits: <strong id="cl-total">0</strong></td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CGPA ═══ -->
+<section class="section" id="sec-cgpa">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge cgpa-badge">02</span>
+      <h2>CGPA / GPA Calculator</h2>
+    </div>
+  </div>
+
+  <div class="cgpa-layout">
+    <!-- GPA Calculator -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-calculator"></i> Semester GPA</h3>
+      <p class="cgpa-card-sub">Add your courses for this semester to calculate GPA</p>
+      <div id="gpa-courses"></div>
+      <button class="btn-add-row" id="btn-add-gpa-course"><i class="fa-solid fa-plus"></i> Add Course</button>
+      <div class="cgpa-result-row">
+        <div class="cgpa-result-box">
+          <div class="crb-label">Semester GPA</div>
+          <div class="crb-val" id="gpa-result">—</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Total Credits</div>
+          <div class="crb-val" id="gpa-credits">0</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Grade</div>
+          <div class="crb-val" id="gpa-grade">—</div>
+        </div>
+      </div>
+      <button class="btn-calc" onclick="calcGPA()"><i class="fa-solid fa-bolt"></i> Calculate GPA</button>
+    </div>
+
+    <!-- CGPA Calculator -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-chart-line"></i> Cumulative CGPA</h3>
+      <p class="cgpa-card-sub">Enter GPA and credits for each semester</p>
+      <div id="cgpa-sems"></div>
+      <button class="btn-add-row" id="btn-add-sem"><i class="fa-solid fa-plus"></i> Add Semester</button>
+      <div class="cgpa-result-row">
+        <div class="cgpa-result-box">
+          <div class="crb-label">Cumulative CGPA</div>
+          <div class="crb-val" id="cgpa-result">—</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Total Credits</div>
+          <div class="crb-val" id="cgpa-total-cr">0</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Classification</div>
+          <div class="crb-val" id="cgpa-class">—</div>
+        </div>
+      </div>
+      <button class="btn-calc" onclick="calcCGPA()"><i class="fa-solid fa-bolt"></i> Calculate CGPA</button>
+    </div>
+
+    <!-- Grade Predictor -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-bullseye"></i> Target GPA Predictor</h3>
+      <p class="cgpa-card-sub">Find the GPA you need in remaining semesters to hit your target CGPA</p>
+      <div class="pred-grid">
+        <div class="pred-field"><label>Current CGPA</label><input type="number" id="pred-curr" step="0.01" min="0" max="10" placeholder="e.g. 8.2"/></div>
+        <div class="pred-field"><label>Credits Completed</label><input type="number" id="pred-done-cr" min="0" placeholder="e.g. 120"/></div>
+        <div class="pred-field"><label>Target CGPA</label><input type="number" id="pred-target" step="0.01" min="0" max="10" placeholder="e.g. 9.0"/></div>
+        <div class="pred-field"><label>Remaining Credits</label><input type="number" id="pred-rem-cr" min="0" placeholder="e.g. 60"/></div>
+      </div>
+      <button class="btn-calc" onclick="calcPredictor()"><i class="fa-solid fa-bolt"></i> Predict</button>
+      <div class="pred-result hidden" id="pred-result-box">
+        <div class="pred-res-label">Required GPA in remaining semesters</div>
+        <div class="pred-res-val" id="pred-res-val">—</div>
+        <div class="pred-res-msg" id="pred-res-msg"></div>
+      </div>
+    </div>
+
+    <!-- VIT Grade Table -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-table"></i> VIT Grade Scale</h3>
+      <table class="grade-table">
+        <thead><tr><th>Grade</th><th>Points</th><th>Range</th></tr></thead>
+        <tbody>
+          <tr><td>S</td><td>10</td><td>≥ 90</td></tr>
+          <tr><td>A+</td><td>9</td><td>80 – 89</td></tr>
+          <tr><td>A</td><td>8</td><td>70 – 79</td></tr>
+          <tr><td>B+</td><td>7</td><td>60 – 69</td></tr>
+          <tr><td>B</td><td>6</td><td>50 – 59</td></tr>
+          <tr><td>C</td><td>5</td><td>40 – 49</td></tr>
+          <tr><td>F</td><td>0</td><td>< 40</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NPTEL ═══ -->
+<section class="section" id="sec-nptel">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge nptel-badge">03</span>
+      <h2>NPTEL Practice</h2>
+    </div>
+  </div>
+
+  <div class="nptel-stats-row">
+    <div class="nstat"><span class="nstat-n">25</span><span class="nstat-l">Courses</span></div>
+    <div class="nstat"><span class="nstat-n">3200+</span><span class="nstat-l">Questions</span></div>
+    <div class="nstat"><span class="nstat-n">300+</span><span class="nstat-l">Weeks Content</span></div>
+    <div class="nstat"><span class="nstat-n">65K+</span><span class="nstat-l">Users</span></div>
+  </div>
+
+  <!-- Course grid -->
+  <div id="nptel-home">
+    <div class="nptel-search-row">
+      <input type="text" id="nptel-search" placeholder="Search NPTEL courses..." oninput="filterNptel()"/>
+    </div>
+    <div class="nptel-grid" id="nptel-grid"></div>
+  </div>
+
+  <!-- Quiz view -->
+  <div class="nptel-quiz-view hidden" id="nptel-quiz-view">
+    <button class="back-btn" onclick="closeNptelQuiz()"><i class="fa-solid fa-arrow-left"></i> All Courses</button>
+    <div class="quiz-header">
+      <h3 id="quiz-course-title"></h3>
+      <div class="quiz-mode-btns">
+        <button class="qmode-btn active" id="qm-week" onclick="setQuizMode('week')">By Week</button>
+        <button class="qmode-btn" id="qm-full" onclick="setQuizMode('full')">Full Quiz</button>
+      </div>
+    </div>
+    <div class="quiz-body" id="quiz-body"></div>
+    <div class="quiz-external-link" id="quiz-ext-link"></div>
+  </div>
+</section>
+
+<!-- ═══ PYQ PAPERS ═══ -->
+<section class="section" id="sec-pyq">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge pyq-badge">04</span>
+      <h2>PYQ Papers</h2>
+    </div>
+  </div>
+
+  <div class="pyq-stats-row">
+    <div class="nstat"><span class="nstat-n">1500+</span><span class="nstat-l">Papers</span></div>
+    <div class="nstat"><span class="nstat-n">3</span><span class="nstat-l">Exam Types</span></div>
+    <div class="nstat"><span class="nstat-n">Free</span><span class="nstat-l">No Login</span></div>
+    <div class="nstat"><span class="nstat-n">PDF</span><span class="nstat-l">Download</span></div>
+  </div>
+
+  <div class="pyq-filters">
+    <div class="pf-group">
+      <label>Exam Type</label>
+      <div class="pf-btns" id="pf-type">
+        <button class="pf-btn active" data-val="all">All</button>
+        <button class="pf-btn" data-val="CAT1">CAT 1</button>
+        <button class="pf-btn" data-val="CAT2">CAT 2</button>
+        <button class="pf-btn" data-val="FAT">FAT</button>
+      </div>
+    </div>
+    <div class="pf-group">
+      <label>Year</label>
+      <div class="pf-btns" id="pf-year">
+        <button class="pf-btn active" data-val="all">All</button>
+        <button class="pf-btn" data-val="2024">2024</button>
+        <button class="pf-btn" data-val="2023">2023</button>
+        <button class="pf-btn" data-val="2022">2022</button>
+        <button class="pf-btn" data-val="2021">2021</button>
+      </div>
+    </div>
+    <div class="pf-search">
+      <input type="text" id="pyq-search" placeholder="Search by subject or code..." oninput="filterPYQ()"/>
+    </div>
+  </div>
+
+  <div class="pyq-grid" id="pyq-grid"></div>
+  <div class="pyq-source-note">
+    <i class="fa-solid fa-circle-info"></i>
+    Papers sourced from <strong>papers.codechefvit.com</strong> — Built by students for students. 
+    <a href="https://www.papers.codechefvit.com/" target="_blank" rel="noopener">Visit original site <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+  </div>
+</section>
+
+<!-- ═══ MODALS ═══ -->
+<div class="overlay hidden" id="overlay"></div>
+
+<!-- FFCS Add Modal -->
+<div class="modal modal-ffcs hidden" id="modal-add">
+  <button class="modal-x" id="modal-add-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-slot-tag" id="modal-slot-tag">A1 / L1</div>
+  <h3 class="modal-title">Add Course</h3>
+  <p class="modal-times" id="modal-times"></p>
+  <div class="mfields">
+    <div class="mrow">
+      <div class="mf"><label>Course Code</label><input id="m-code" placeholder="e.g. CSE1001"/></div>
+      <div class="mf mf-sm"><label>Credits</label><input id="m-credits" type="number" min="1" max="10" placeholder="5"/></div>
+    </div>
+    <div class="mf"><label>Course Title</label><input id="m-title" placeholder="e.g. Problem Solving and OOP"/></div>
+    <div class="mrow">
+      <div class="mf"><label>Faculty</label><input id="m-faculty" placeholder="Faculty name"/></div>
+      <div class="mf"><label>Venue</label><input id="m-venue" placeholder="e.g. SJT423"/></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="mbtn-cancel" id="modal-add-cancel">Cancel</button>
+    <button class="mbtn-primary" id="modal-add-save"><i class="fa-solid fa-plus"></i> Add Course</button>
+  </div>
+</div>
+
+<!-- FFCS Edit Modal -->
+<div class="modal modal-ffcs hidden" id="modal-edit">
+  <button class="modal-x" id="modal-edit-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-slot-tag" id="edit-slot-tag">A1</div>
+  <h3 class="modal-title">Edit Course</h3>
+  <div class="mfields">
+    <div class="mrow">
+      <div class="mf"><label>Course Code</label><input id="e-code"/></div>
+      <div class="mf mf-sm"><label>Credits</label><input id="e-credits" type="number" min="1" max="10"/></div>
+    </div>
+    <div class="mf"><label>Course Title</label><input id="e-title"/></div>
+    <div class="mrow">
+      <div class="mf"><label>Faculty</label><input id="e-faculty"/></div>
+      <div class="mf"><label>Venue</label><input id="e-venue"/></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="mbtn-danger" id="modal-edit-remove"><i class="fa-solid fa-trash"></i> Remove</button>
+    <button class="mbtn-cancel" id="modal-edit-cancel">Cancel</button>
+    <button class="mbtn-primary" id="modal-edit-save"><i class="fa-solid fa-check"></i> Save</button>
+  </div>
+</div>
+
+<!-- Paper Viewer Modal -->
+<div class="modal modal-lg hidden" id="modal-paper-viewer">
+  <button class="modal-x" id="pv-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="pv-header">
+    <div class="pv-info">
+      <h3 id="pv-title">CSE2001 - CAT1 (2024)</h3>
+      <p id="pv-subtitle">Internal Secure Document Stream • VIT Vellore</p>
+    </div>
+    <div class="tact-btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Print PDF</div>
+  </div>
+  <div class="pv-content">
+    <div class="pv-watermark">EDUHUB VIT ARCHIVE</div>
+    <div class="pv-doc-sim">
+      <h2>QUESTION PAPER ARCHIVE</h2>
+      <div class="q-line"><span class="q-num">1.</span> <div>Design a 4-bit carry look-ahead adder and explain its advantages over a ripple carry adder in terms of propagation delay. [5 Marks]</div></div>
+      <div class="q-line"><span class="q-num">2.</span> <div>Illustrate the execution of a 'load' instruction in a single-cycle datapath. Which control signals are active? [5 Marks]</div></div>
+      <div class="q-line"><span class="q-num">3.</span> <div>Compare and contrast RISC and CISC architectures with respect to instruction set complexity and compiler optimization. [10 Marks]</div></div>
+      <div class="q-line"><span class="q-num">4.</span> <div>Explain the concept of Pipelining and identify the various types of pipeline hazards with suitable examples. [10 Marks]</div></div>
+    </div>
+  </div>
+  <div class="pv-footer">
+    <div class="pv-stats"><span class="pv-stat"><i class="fa-regular fa-eye"></i> 1.2k Views</span><span class="pv-stat"><i class="fa-regular fa-file-pdf"></i> 2.4 MB</span></div>
+    <button class="mbtn-primary" onclick="showSystemToast('Download triggered...')">Download Offline Copy</button>
+  </div>
+</div>
+
+<!-- Conflict Modal -->
+<div class="modal modal-sm hidden" id="modal-conflict">
+  <div class="modal-icon-big">⚠️</div>
+  <h3 class="modal-title">Slot Conflict</h3>
+  <p class="modal-msg" id="conflict-msg"></p>
+  <button class="mbtn-primary" style="width:100%" id="conflict-ok">Got it</button>
+</div>
+
+<!-- Reset Modal -->
+<div class="modal modal-sm hidden" id="modal-reset-confirm">
+  <div class="modal-icon-big">🗑️</div>
+  <h3 class="modal-title">Reset Timetable?</h3>
+  <p class="modal-msg">All courses will be permanently erased.</p>
+  <div class="modal-footer">
+    <button class="mbtn-cancel" id="reset-cancel">Cancel</button>
+    <button class="mbtn-danger" id="reset-ok">Yes, Reset</button>
+  </div>
+</div>
+
+<!-- Download Modal -->
+<div class="modal modal-sm hidden" id="modal-dl">
+  <div class="modal-icon-big">📥</div>
+  <h3 class="modal-title">Download</h3>
+  <div class="modal-footer" style="flex-direction:column;gap:10px;">
+    <button class="mbtn-primary" id="dl-print"><i class="fa-solid fa-print"></i> Save as PDF (Print)</button>
+    <button class="mbtn-cancel" id="dl-csv"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+    <button class="mbtn-ghost" id="dl-cancel">Cancel</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast"><span id="toast-msg"></span></div>
+<script src="app.js"></script>
+>>>>>>> fcc9f38 (first commit)
 </body>
 </html>
