@@ -1,1053 +1,465 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FFCS On The Go - Vellore Campus</title>
-  
-  <!-- Fonts & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-  <style>
-    /* ==========================================================================
-       1. CORE STYLES & RESET
-       ========================================================================== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f8fafc;
-      color: #1e293b;
-      padding: 20px;
-      line-height: 1.5;
-    }
-
-    /* ==========================================================================
-       2. NAVBAR & HEADER Layout
-       ========================================================================== */
-    .navbar {
-      background: #7c3aed;
-      color: white;
-      padding: 16px 24px;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.025em;
-    }
-
-    .campus-label {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-
-    /* ==========================================================================
-       3. COURSE INPUT PANEL (Fixes layout constraints seen in image_2e83c5.png)
-       ========================================================================== */
-    .course-input-panel {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .panel-inner {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .panel-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .field-group label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #475569;
-    }
-
-    .field-group input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      transition: border-color 0.15s ease;
-    }
-
-    .field-group input:focus {
-      outline: none;
-      border-color: #7c3aed;
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
-    }
-
-    .field-group-sm {
-      flex-grow: 0;
-      min-width: 80px;
-    }
-
-    /* Action bar row inside input panel */
-    .panel-actions-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      border-top: 1px solid #f1f5f9;
-      padding-top: 16px;
-    }
-
-    .selected-slot-display {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .selected-slot-display label {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #64748b;
-    }
-
-    .selected-slot-info {
-      font-weight: 700;
-      color: #7c3aed;
-      padding: 6px 16px;
-      background: #f5f3ff;
-      border: 1px dashed #c084fc;
-      border-radius: 6px;
-      font-size: 0.95rem;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-    }
-
-    button {
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: 500;
-      padding: 10px 18px;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.15s ease;
-    }
-
-    .btn-add {
-      background: #7c3aed;
-      color: white;
-    }
-
-    .btn-add:hover { background: #6d28d9; }
-
-    .btn-clear-form {
-      background: white;
-      border-color: #cbd5e1;
-      color: #475569;
-    }
-
-    .btn-clear-form:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-    }
-
-    /* Utility Action Bar */
-    .action-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .btn-default-table {
-      background: white;
-      border-color: #cbd5e1;
-      color: #1e293b;
-    }
-
-    .btn-download {
-      background: #059669;
-      color: white;
-    }
-    .btn-download:hover { background: #047857; }
-
-    .btn-reset {
-      background: #dc2626;
-      color: white;
-    }
-    .btn-reset:hover { background: #b91c1c; }
-
-    /* ==========================================================================
-       4. VIT TIMETABLE GRID MATRIX (Fixes text stacking from image_2e83c5.png)
-       ========================================================================== */
-    .timetable-container {
-      width: 100%;
-      overflow-x: auto;
-      background: white;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    }
-
-    .timetable-scroll {
-      min-width: 1200px;
-      padding: 16px;
-    }
-
-    .timetable {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed; /* Crucial structural layout constraint */
-      background: #ffffff;
-    }
-
-    .timetable th, .timetable td {
-      border: 1px solid #a1a1a1;
-      text-align: center;
-      vertical-align: middle;
-      font-size: 0.75rem;
-      padding: 6px 4px;
-      height: 52px;
-      word-wrap: break-word;
-    }
-
-    /* Header Design Matches VIT Standards */
-    .header-theory th {
-      background-color: #b4c6e7 !important;
-      color: #000000;
-      font-weight: 700;
-      height: 40px;
-    }
-
-    .header-lab th {
-      background-color: #9cc2e5 !important;
-      color: #000000;
-      font-weight: 700;
-      height: 40px;
-    }
-
-    .td-day {
-      background-color: #cccccc !important;
-      color: #000000;
-      font-weight: 700;
-      width: 90px;
-      font-size: 0.8rem;
-    }
-
-    /* Core Interactive State Cells */
-    .td-cell, .td-v {
-      background-color: #fff2cc; /* Accurate VIT Yellow Base */
-      cursor: cell;
-      transition: background-color 0.15s ease, transform 0.1s ease;
-    }
-
-    .td-cell:hover, .td-v:hover {
-      background-color: #fef08a !important;
-      outline: 2px solid #7c3aed;
-      outline-offset: -2px;
-    }
-
-    .td-cell.active-selection {
-      background-color: #ddd6fe !important;
-      outline: 3px solid #7c3aed;
-      outline-offset: -3px;
-    }
-
-    /* Lunch Space Divider Column */
-    .th-lunch, .td-lunch-body {
-      background-color: #cccccc !important;
-      width: 35px !important;
-      font-weight: 700;
-      color: #000000;
-    }
-
-    .th-lunch {
-      writing-mode: vertical-rl;
-      text-orientation: upright;
-      letter-spacing: 1px;
-      font-size: 0.75rem;
-    }
-
-    /* Filled Slot Visual Indicators */
-    .cell-filled {
-      background: #7c3aed !important;
-      color: white !important;
-      height: 100%;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      border-radius: 4px;
-      padding: 2px;
-      box-shadow: inset 0 0 4px rgba(0,0,0,0.15);
-      animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .cf-slot {
-      font-size: 0.6rem;
-      font-weight: 500;
-      opacity: 0.85;
-      text-transform: uppercase;
-    }
-
-    .cf-name {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      margin: 1px 0;
-    }
-
-    .cf-venue {
-      font-size: 0.6rem;
-      opacity: 0.9;
-      font-style: italic;
-    }
-
-    .cell-default {
-      display: block;
-      color: #4b5563;
-      font-weight: 500;
-    }
-
-    /* ==========================================================================
-       5. REGISTERED COURSE LIST TABLE
-       ========================================================================== */
-    .courselist-container {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .courselist-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    .courselist-table th {
-      background: #f1f5f9;
-      color: #475569;
-      font-weight: 600;
-      padding: 12px 16px;
-      font-size: 0.85rem;
-      border-bottom: 2px solid #e2e8f0;
-    }
-
-    .courselist-table td {
-      padding: 14px 16px;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #e2e8f0;
-      color: #334155;
-    }
-
-    .courselist-table tbody tr:hover {
-      background: #f8fafc;
-    }
-
-    .btn-delete-course {
-      background: none;
-      border: none;
-      color: #ef4444;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .btn-delete-course:hover {
-      background: #fee2e2;
-    }
-
-    .total-credits-row {
-      text-align: right;
-      font-size: 1.05rem;
-      color: #1e293b;
-      padding-top: 16px !important;
-    }
-
-    .total-credits-row span {
-      color: #7c3aed;
-      font-weight: 700;
-    }
-
-    /* ==========================================================================
-       6. SYSTEM NOTIFICATIONS & MODALS
-       ========================================================================== */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #1e293b;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-content {
-      background: white;
-      border-radius: 12px;
-      max-width: 480px;
-      width: 90%;
-      padding: 24px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-      transform: scale(0.95);
-      transition: transform 0.2s ease;
-    }
-
-    .modal-overlay.active .modal-content {
-      transform: scale(1);
-    }
-
-    .modal-header {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: #0f172a;
-    }
-
-    .modal-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .opt-btn {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      color: #1e293b;
-      width: 100%;
-      justify-content: flex-start;
-      padding: 12px;
-    }
-
-    .opt-btn:hover {
-      background: #e2e8f0;
-      border-color: #94a3b8;
-    }
-
-    .hidden { display: none !important; }
-
-    @keyframes popIn {
-      0% { transform: scale(0.8); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EduHub VIT — Your All-in-One Academic Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Satoshi:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- Main Application Header Navigation -->
-  <nav class="navbar">
-    <div class="navbar-left">
-      <span class="brand">FFCS On The Go</span>
-      <span class="campus-label">Vellore Campus</span>
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursor-trail"></div>
+
+<!-- NOISE OVERLAY -->
+<div class="noise"></div>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" onclick="showSection('home')">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">EduHub<span class="logo-vit">VIT</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#" class="nav-link" onclick="showSection('ffcs')"><span>01</span>FFCS</a>
+      <a href="#" class="nav-link" onclick="showSection('cgpa')"><span>02</span>CGPA</a>
+      <a href="#" class="nav-link" onclick="showSection('nptel')"><span>03</span>NPTEL</a>
+      <a href="#" class="nav-link" onclick="showSection('pyq')"><span>04</span>PYQ Papers</a>
     </div>
-  </nav>
+    <button class="nav-menu-btn" id="nav-menu-btn"><i class="fa-solid fa-bars"></i></button>
+  </div>
+</nav>
 
-  <!-- Interactive Information Form Base Panel -->
-  <div class="course-input-panel" id="course-panel">
-    <div class="panel-inner">
-      <div class="panel-row">
-        <div class="field-group">
-          <label for="inp-code">Course Code</label>
-          <input type="text" id="inp-code" placeholder="e.g. CSE1001" autocomplete="off"/>
-        </div>
-        <div class="field-group">
-          <label for="inp-title">Course Title</label>
-          <input type="text" id="inp-title" placeholder="e.g. Database Systems" autocomplete="off"/>
-        </div>
-        <div class="field-group">
-          <label for="inp-faculty">Faculty</label>
-          <input type="text" id="inp-faculty" placeholder="Faculty Name" autocomplete="off"/>
-        </div>
-        <div class="field-group">
-          <label for="inp-venue">Venue</label>
-          <input type="text" id="inp-venue" placeholder="e.g. SJT423" autocomplete="off"/>
-        </div>
-        <div class="field-group field-group-sm">
-          <label for="inp-credits">Credits</label>
-          <input type="number" id="inp-credits" placeholder="4" min="1" max="5" value="4"/>
-        </div>
+<!-- ═══ HOME ═══ -->
+<section class="section active" id="sec-home">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-orb orb1"></div>
+    <div class="hero-orb orb2"></div>
+    <div class="hero-orb orb3"></div>
+    <div class="hero-inner">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        VIT Vellore Student Portal
       </div>
-
-      <div class="panel-actions-row">
-        <div class="selected-slot-display">
-          <label>Active Matrix Pointer:</label>
-          <span class="selected-slot-info" id="selected-slot-info">Select a grid space cell below</span>
-        </div>
-        <div class="action-buttons">
-          <button class="btn-add" id="btn-add" onclick="processCourseCommit()"><i class="fa-solid fa-plus"></i> Bind Entry</button>
-          <button class="btn-clear-form" onclick="clearFormInputFields()">Clear Fields</button>
-        </div>
+      <h1 class="hero-h1">
+        Everything You Need<br>
+        <em>In One Place.</em>
+      </h1>
+      <p class="hero-p">Plan your FFCS, track your CGPA, prep for NPTEL and access 1500+ PYQ papers — all in one seamless platform built for VIT students.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showSection('ffcs')">Start Planning <i class="fa-solid fa-arrow-right"></i></button>
+        <button class="btn-ghost" onclick="showSection('pyq')">Browse Papers</button>
+      </div>
+      <div class="hero-chips">
+        <span class="chip"><i class="fa-solid fa-bolt"></i> No login required</span>
+        <span class="chip"><i class="fa-solid fa-lock"></i> Data stays on device</span>
+        <span class="chip"><i class="fa-solid fa-infinity"></i> Always free</span>
+      </div>
+    </div>
+    <div class="hero-cards-float">
+      <div class="hcard hc1" onclick="showSection('ffcs')">
+        <div class="hcard-icon">📅</div>
+        <div class="hcard-label">FFCS Planner</div>
+        <div class="hcard-sub">Click cell → Add course</div>
+      </div>
+      <div class="hcard hc2" onclick="showSection('cgpa')">
+        <div class="hcard-icon">📊</div>
+        <div class="hcard-label">CGPA Calculator</div>
+        <div class="hcard-sub">GPA / CGPA / Grade</div>
+      </div>
+      <div class="hcard hc3" onclick="showSection('nptel')">
+        <div class="hcard-icon">🎓</div>
+        <div class="hcard-label">NPTEL Practice</div>
+        <div class="hcard-sub">25 courses · 3200+ MCQs</div>
+      </div>
+      <div class="hcard hc4" onclick="showSection('pyq')">
+        <div class="hcard-icon">📄</div>
+        <div class="hcard-label">PYQ Papers</div>
+        <div class="hcard-sub">1500+ CAT · FAT papers</div>
       </div>
     </div>
   </div>
 
-  <!-- Operational Configuration Bar Container -->
-  <div class="action-bar">
-    <div class="action-left">
-      <button class="btn-default-table" id="btn-default-table">General Base Grid <i class="fa-solid fa-layer-group"></i></button>
-    </div>
-    <div class="action-right">
-      <button class="btn-download" onclick="exportTimetableSchema()"><i class="fa-solid fa-file-export"></i> Export JSON</button>
-      <button class="btn-reset" onclick="triggerSystemReset()"><i class="fa-solid fa-trash-can"></i> Flush All Data</button>
+  <!-- STATS MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span>FFCS Planner</span><span class="sep">✦</span>
+      <span>1500+ Papers</span><span class="sep">✦</span>
+      <span>3200+ NPTEL MCQs</span><span class="sep">✦</span>
+      <span>CGPA Calculator</span><span class="sep">✦</span>
+      <span>No Sign-up</span><span class="sep">✦</span>
+      <span>25 NPTEL Courses</span><span class="sep">✦</span>
+      <span>VIT Vellore</span><span class="sep">✦</span>
+      <span>CAT1 · CAT2 · FAT</span><span class="sep">✦</span>
+      <!-- duplicate for seamless loop -->
+      <span>FFCS Planner</span><span class="sep">✦</span>
+      <span>1500+ Papers</span><span class="sep">✦</span>
+      <span>3200+ NPTEL MCQs</span><span class="sep">✦</span>
+      <span>CGPA Calculator</span><span class="sep">✦</span>
+      <span>No Sign-up</span><span class="sep">✦</span>
+      <span>25 NPTEL Courses</span><span class="sep">✦</span>
+      <span>VIT Vellore</span><span class="sep">✦</span>
+      <span>CAT1 · CAT2 · FAT</span><span class="sep">✦</span>
     </div>
   </div>
 
-  <!-- Matrix Grid Outer Frame Wrapper Viewport -->
-  <div class="timetable-container">
-    <div class="timetable-scroll">
-      <table class="timetable" id="timetable">
-        <!-- Render Matrix Structure Target Hook -->
+  <!-- TOOL GRID -->
+  <div class="tools-grid-section">
+    <h2 class="section-h2">Pick Your Tool</h2>
+    <div class="tools-grid">
+      <div class="tool-card tc-ffcs" onclick="showSection('ffcs')">
+        <div class="tc-num">01</div>
+        <div class="tc-icon"><i class="fa-solid fa-table-cells"></i></div>
+        <h3>FFCS Planner</h3>
+        <p>Click any timetable cell to add your course. Auto conflict detection, quick view mode, CSV export.</p>
+        <div class="tc-tags"><span>Vellore Campus</span><span>All Slots</span><span>localStorage</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+      <div class="tool-card tc-cgpa" onclick="showSection('cgpa')">
+        <div class="tc-num">02</div>
+        <div class="tc-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>CGPA Calculator</h3>
+        <p>Calculate your GPA per semester, cumulative CGPA, required grade targets and grade predictor.</p>
+        <div class="tc-tags"><span>GPA</span><span>CGPA</span><span>Grade Predictor</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+      <div class="tool-card tc-nptel" onclick="showSection('nptel')">
+        <div class="tc-num">03</div>
+        <div class="tc-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <h3>NPTEL Practice</h3>
+        <p>25 courses, 3200+ verified MCQs organised by week. Practice mode and full quiz mode available.</p>
+        <div class="tc-tags"><span>25 Courses</span><span>3200+ MCQs</span><span>Apr 2026</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+      <div class="tool-card tc-pyq" onclick="showSection('pyq')">
+        <div class="tc-num">04</div>
+        <div class="tc-icon"><i class="fa-solid fa-file-lines"></i></div>
+        <h3>PYQ Papers</h3>
+        <p>1500+ previous year question papers for CAT1, CAT2 and FAT. Filter by subject, slot, year, exam type.</p>
+        <div class="tc-tags"><span>CAT1</span><span>CAT2</span><span>FAT</span><span>1500+</span></div>
+        <div class="tc-arrow"><i class="fa-solid fa-arrow-up-right"></i></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══ FFCS ═══ -->
+<section class="section" id="sec-ffcs">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge ffcs-badge">01</span>
+      <h2>FFCS Planner <span class="campus-chip">Vellore Campus</span></h2>
+    </div>
+    <div class="tool-actions">
+      <button class="tact-btn" id="btn-quickvis"><i class="fa-regular fa-eye"></i> Quick View</button>
+      <button class="tact-btn tact-green" id="btn-download-tt"><i class="fa-solid fa-download"></i> Download</button>
+      <button class="tact-btn tact-red" id="btn-reset"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+    </div>
+  </div>
+
+  <div class="ffcs-hint"><i class="fa-solid fa-hand-pointer"></i> Click any cell to add a course · Double-click a filled cell to edit</div>
+
+  <div class="timetable-wrap">
+    <div class="timetable-scroll"><table id="timetable" class="timetable"></table></div>
+    <div class="tt-legend">
+      <span><span class="ld theory"></span> Theory hours</span>
+      <span><span class="ld lab"></span> Lab hours</span>
+      <span><span class="ld filled"></span> Course added</span>
+    </div>
+  </div>
+
+  <div class="course-list-wrap">
+    <div class="cl-header">
+      <h3>Selected Courses</h3>
+      <span class="credit-badge" id="credit-badge">0 Credits</span>
+    </div>
+    <div class="cl-scroll">
+      <table class="cl-table">
+        <thead><tr><th>Slot</th><th>Code</th><th>Title</th><th>Faculty</th><th>Venue</th><th>Credits</th><th></th></tr></thead>
+        <tbody id="cl-body"></tbody>
+        <tfoot><tr><td colspan="7" class="cl-total">Total Credits: <strong id="cl-total">0</strong></td></tr></tfoot>
       </table>
     </div>
   </div>
+</section>
 
-  <!-- Real-time Summary Aggregations Table Grid View -->
-  <div class="courselist-container">
-    <table class="courselist-table" id="courselist-table">
-      <thead>
-        <tr>
-          <th>Target Slot</th>
-          <th>Course Code</th>
-          <th>Title Descriptor</th>
-          <th>Assigned Faculty</th>
-          <th>Location Venue</th>
-          <th>Weight Cr</th>
-          <th style="width: 60px; text-align: center;">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="courselist-body">
-        <!-- Structural Row Inserter target hook -->
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="7" class="total-credits-row">
-            <strong>Aggregated Base Target Volume: <span id="total-credits">0</span> Credits</strong>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <!-- System Dialog Action Layer Interface Components -->
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-header" id="modal-title">Select Component Layer</div>
-      <p style="font-size: 0.9rem; color: #475569;" id="modal-desc">This block handles multiple allocations. Select the context layer frame target:</p>
-      <div class="modal-options" id="modal-options-box">
-         <!-- Injected Context Options UI Target Hook -->
-      </div>
+<!-- ═══ CGPA ═══ -->
+<section class="section" id="sec-cgpa">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge cgpa-badge">02</span>
+      <h2>CGPA / GPA Calculator</h2>
     </div>
   </div>
 
-  <!-- User Alert Message View Pipeline -->
-  <div class="toast" id="toast">
-    <i class="fa-solid fa-circle-info" id="toast-icon" style="color: #a78bfa;"></i>
-    <span id="toast-msg">Execution system initialized successfully</span>
+  <div class="cgpa-layout">
+    <!-- GPA Calculator -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-calculator"></i> Semester GPA</h3>
+      <p class="cgpa-card-sub">Add your courses for this semester to calculate GPA</p>
+      <div id="gpa-courses"></div>
+      <button class="btn-add-row" id="btn-add-gpa-course"><i class="fa-solid fa-plus"></i> Add Course</button>
+      <div class="cgpa-result-row">
+        <div class="cgpa-result-box">
+          <div class="crb-label">Semester GPA</div>
+          <div class="crb-val" id="gpa-result">—</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Total Credits</div>
+          <div class="crb-val" id="gpa-credits">0</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Grade</div>
+          <div class="crb-val" id="gpa-grade">—</div>
+        </div>
+      </div>
+      <button class="btn-calc" onclick="calcGPA()"><i class="fa-solid fa-bolt"></i> Calculate GPA</button>
+    </div>
+
+    <!-- CGPA Calculator -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-chart-line"></i> Cumulative CGPA</h3>
+      <p class="cgpa-card-sub">Enter GPA and credits for each semester</p>
+      <div id="cgpa-sems"></div>
+      <button class="btn-add-row" id="btn-add-sem"><i class="fa-solid fa-plus"></i> Add Semester</button>
+      <div class="cgpa-result-row">
+        <div class="cgpa-result-box">
+          <div class="crb-label">Cumulative CGPA</div>
+          <div class="crb-val" id="cgpa-result">—</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Total Credits</div>
+          <div class="crb-val" id="cgpa-total-cr">0</div>
+        </div>
+        <div class="cgpa-result-box">
+          <div class="crb-label">Classification</div>
+          <div class="crb-val" id="cgpa-class">—</div>
+        </div>
+      </div>
+      <button class="btn-calc" onclick="calcCGPA()"><i class="fa-solid fa-bolt"></i> Calculate CGPA</button>
+    </div>
+
+    <!-- Grade Predictor -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-bullseye"></i> Target GPA Predictor</h3>
+      <p class="cgpa-card-sub">Find the GPA you need in remaining semesters to hit your target CGPA</p>
+      <div class="pred-grid">
+        <div class="pred-field"><label>Current CGPA</label><input type="number" id="pred-curr" step="0.01" min="0" max="10" placeholder="e.g. 8.2"/></div>
+        <div class="pred-field"><label>Credits Completed</label><input type="number" id="pred-done-cr" min="0" placeholder="e.g. 120"/></div>
+        <div class="pred-field"><label>Target CGPA</label><input type="number" id="pred-target" step="0.01" min="0" max="10" placeholder="e.g. 9.0"/></div>
+        <div class="pred-field"><label>Remaining Credits</label><input type="number" id="pred-rem-cr" min="0" placeholder="e.g. 60"/></div>
+      </div>
+      <button class="btn-calc" onclick="calcPredictor()"><i class="fa-solid fa-bolt"></i> Predict</button>
+      <div class="pred-result hidden" id="pred-result-box">
+        <div class="pred-res-label">Required GPA in remaining semesters</div>
+        <div class="pred-res-val" id="pred-res-val">—</div>
+        <div class="pred-res-msg" id="pred-res-msg"></div>
+      </div>
+    </div>
+
+    <!-- VIT Grade Table -->
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-table"></i> VIT Grade Scale</h3>
+      <table class="grade-table">
+        <thead><tr><th>Grade</th><th>Points</th><th>Range</th></tr></thead>
+        <tbody>
+          <tr><td>S</td><td>10</td><td>≥ 90</td></tr>
+          <tr><td>A+</td><td>9</td><td>80 – 89</td></tr>
+          <tr><td>A</td><td>8</td><td>70 – 79</td></tr>
+          <tr><td>B+</td><td>7</td><td>60 – 69</td></tr>
+          <tr><td>B</td><td>6</td><td>50 – 59</td></tr>
+          <tr><td>C</td><td>5</td><td>40 – 49</td></tr>
+          <tr><td>F</td><td>0</td><td>< 40</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NPTEL ═══ -->
+<section class="section" id="sec-nptel">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge nptel-badge">03</span>
+      <h2>NPTEL Practice</h2>
+    </div>
   </div>
 
-  <!-- ==========================================================================
-     7. BUSINESS LOGIC ENGINE & DATA MANAGEMENT ENGINE
-     ========================================================================== -->
-  <script>
-    /**
-     * VIT FFCS Structural Core Time Mapping Matrix Data Constants definitions
-     */
-    const TIME_THEORY = ["08:00 AM - 08:50 AM", "09:00 AM - 09:50 AM", "10:00 AM - 10:50 AM", "11:00 AM - 11:50 AM", "12:00 PM - 12:50 PM", "01:30 PM - 02:20 PM", "02:30 PM - 03:20 PM", "03:30 PM - 04:20 PM", "04:30 PM - 05:20 PM", "05:30 PM - 06:20 PM"];
-    const TIME_LAB = ["08:00-08:50", "08:50-09:40", "09:50-10:40", "10:40-11:30", "11:40-12:30", "12:30-01:20", "01:30-02:20", "02:20-03:10", "03:20-04:10", "04:10-05:00", "05:10-06:00", "06:00-06:50"];
-    const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
+  <div class="nptel-stats-row">
+    <div class="nstat"><span class="nstat-n">25</span><span class="nstat-l">Courses</span></div>
+    <div class="nstat"><span class="nstat-n">3200+</span><span class="nstat-l">Questions</span></div>
+    <div class="nstat"><span class="nstat-n">300+</span><span class="nstat-l">Weeks Content</span></div>
+    <div class="nstat"><span class="nstat-n">65K+</span><span class="nstat-l">Users</span></div>
+  </div>
 
-    // Precise Row and Column Matrix Map Array for accurate layout assembly
-    const MATRIX_ROW_MAP = [
-      [ {t:"A1",l:"L1"},  {t:"F1",l:"L2"},  {t:"D1",l:"L3"},  {t:"TB1",l:"L4"},  {t:"TG1",l:"L5"},  {l:"L6"},  "LUNCH", {t:"A2",l:"L31"}, {t:"F2",l:"L32"}, {t:"D2",l:"L33"}, {t:"TB2",l:"L34"}, {t:"TG2",l:"L35"}, {l:"L36"}, {t:"V3"} ],
-      [ {t:"B1",l:"L7"},  {t:"G1",l:"L8"},  {t:"E1",l:"L9"},  {t:"TC1",l:"L10"}, {t:"TAA1",l:"L11"},{l:"L12"}, "LUNCH", {t:"B2",l:"L37"}, {t:"G2",l:"L38"}, {t:"E2",l:"L39"}, {t:"TC2",l:"L40"}, {t:"TAA2",l:"L41"},{l:"L42"}, {t:"V4"} ],
-      [ {t:"C1",l:"L13"}, {t:"A1",l:"L14"}, {t:"F1",l:"L15"}, {t:"TD1",l:"L16"}, {t:"TBB1",l:"L17"},{l:"L18"}, "LUNCH", {t:"C2",l:"L43"}, {t:"A2",l:"L44"}, {t:"F2",l:"L45"}, {t:"TD2",l:"L46"}, {t:"TBB2",l:"L47"},{l:"L48"}, {t:"V5"} ],
-      [ {t:"D1",l:"L19"}, {t:"B1",l:"L20"}, {t:"G1",l:"L21"}, {t:"TE1",l:"L22"}, {t:"TCC1",l:"L23"},{l:"L24"}, "LUNCH", {t:"D2",l:"L49"}, {t:"B2",l:"L50"}, {t:"G2",l:"L51"}, {t:"TE2",l:"L52"}, {t:"TCC2",l:"L53"},{l:"L54"}, {t:"V6"} ],
-      [ {t:"E1",l:"L25"}, {t:"C1",l:"L26"}, {t:"B1",l:"L27"}, {t:"TF1",l:"L28"}, {t:"TDD1",l:"L29"},{l:"L30"}, "LUNCH", {t:"E2",l:"L55"}, {t:"C2",l:"L56"}, {t:"B2",l:"L57"}, {t:"TF2",l:"L58"}, {t:"TDD2",l:"L59"},{l:"L60"}, {t:"V7"} ]
-    ];
+  <!-- Course grid -->
+  <div id="nptel-home">
+    <div class="nptel-search-row">
+      <input type="text" id="nptel-search" placeholder="Search NPTEL courses..." oninput="filterNptel()"/>
+    </div>
+    <div class="nptel-grid" id="nptel-grid"></div>
+  </div>
 
-    // State Variables
-    let activeRegisteredCourses = [];
-    let runtimeSelectedSlot = null;
-    let runtimeSelectedType = null; 
+  <!-- Quiz view -->
+  <div class="nptel-quiz-view hidden" id="nptel-quiz-view">
+    <button class="back-btn" onclick="closeNptelQuiz()"><i class="fa-solid fa-arrow-left"></i> All Courses</button>
+    <div class="quiz-header">
+      <h3 id="quiz-course-title"></h3>
+      <div class="quiz-mode-btns">
+        <button class="qmode-btn active" id="qm-week" onclick="setQuizMode('week')">By Week</button>
+        <button class="qmode-btn" id="qm-full" onclick="setQuizMode('full')">Full Quiz</button>
+      </div>
+    </div>
+    <div class="quiz-body" id="quiz-body"></div>
+    <div class="quiz-external-link" id="quiz-ext-link"></div>
+  </div>
+</section>
 
-    // Runtime Initialization Configuration Hook
-    document.addEventListener("DOMContentLoaded", () => {
-      syncStateFromStorage();
-      buildAndRenderTimetableGrid();
-      syncCourseListInterface();
-    });
+<!-- ═══ PYQ PAPERS ═══ -->
+<section class="section" id="sec-pyq">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge pyq-badge">04</span>
+      <h2>PYQ Papers</h2>
+    </div>
+  </div>
 
-    /**
-     * Reconstructs the exact table DOM matrix layout dynamically
-     */
-    function buildAndRenderTimetableGrid() {
-      const targetTable = document.getElementById("timetable");
-      targetTable.innerHTML = "";
+  <div class="pyq-stats-row">
+    <div class="nstat"><span class="nstat-n">1500+</span><span class="nstat-l">Papers</span></div>
+    <div class="nstat"><span class="nstat-n">3</span><span class="nstat-l">Exam Types</span></div>
+    <div class="nstat"><span class="nstat-n">Free</span><span class="nstat-l">No Login</span></div>
+    <div class="nstat"><span class="nstat-n">PDF</span><span class="nstat-l">Download</span></div>
+  </div>
 
-      // Group 1 Header Row: Structural Theory Time References
-      const headTheoryRow = document.createElement("tr");
-      headTheoryRow.className = "header-theory";
-      
-      const cornerTh = document.createElement("th");
-      cornerTh.innerHTML = "THEORY<br>SLOTS";
-      cornerTh.rowSpan = 2;
-      headTheoryRow.appendChild(cornerTh);
+  <div class="pyq-filters">
+    <div class="pf-group">
+      <label>Exam Type</label>
+      <div class="pf-btns" id="pf-type">
+        <button class="pf-btn active" data-val="all">All</button>
+        <button class="pf-btn" data-val="CAT1">CAT 1</button>
+        <button class="pf-btn" data-val="CAT2">CAT 2</button>
+        <button class="pf-btn" data-val="FAT">FAT</button>
+      </div>
+    </div>
+    <div class="pf-group">
+      <label>Year</label>
+      <div class="pf-btns" id="pf-year">
+        <button class="pf-btn active" data-val="all">All</button>
+        <button class="pf-btn" data-val="2024">2024</button>
+        <button class="pf-btn" data-val="2023">2023</button>
+        <button class="pf-btn" data-val="2022">2022</button>
+        <button class="pf-btn" data-val="2021">2021</button>
+      </div>
+    </div>
+    <div class="pf-search">
+      <input type="text" id="pyq-search" placeholder="Search by subject or code..." oninput="filterPYQ()"/>
+    </div>
+  </div>
 
-      TIME_THEORY.forEach((time, index) => {
-        if (index === 6) {
-          const lunchTh = document.createElement("th");
-          lunchTh.textContent = "LUNCH";
-          lunchTh.rowSpan = 2;
-          lunchTh.className = "th-lunch";
-          headTheoryRow.appendChild(lunchTh);
-        }
-        const th = document.createElement("th");
-        th.textContent = time;
-        headTheoryRow.appendChild(th);
-      });
-      // Append extra trailing column padding header boundary space
-      const extraTh = document.createElement("th");
-      extraTh.textContent = "06:30 PM - 07:30 PM";
-      headTheoryRow.appendChild(extraTh);
-      targetTable.appendChild(headTheoryRow);
+  <div class="pyq-grid" id="pyq-grid"></div>
+  <div class="pyq-source-note">
+    <i class="fa-solid fa-circle-info"></i>
+    Papers sourced from <strong>papers.codechefvit.com</strong> — Built by students for students. 
+    <a href="https://www.papers.codechefvit.com/" target="_blank" rel="noopener">Visit original site <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+  </div>
+</section>
 
-      // Group 2 Header Row: Structural Lab Time References
-      const headLabRow = document.createElement("tr");
-      headLabRow.className = "header-lab";
-      TIME_LAB.forEach((time, index) => {
-        // Skip index 6 for alignment due to the lunch column rowspan block
-        const th = document.createElement("th");
-        th.textContent = time;
-        headLabRow.appendChild(th);
-      });
-      targetTable.appendChild(headLabRow);
+<!-- ═══ MODALS ═══ -->
+<div class="overlay hidden" id="overlay"></div>
 
-      // Main Table Matrix Content Row Generation loop
-      MATRIX_ROW_MAP.forEach((rowPayload, rowIndex) => {
-        const tr = document.createElement("tr");
-        
-        // Append Day Index Cell Identifier
-        const dayTd = document.createElement("td");
-        dayTd.className = "td-day";
-        dayTd.textContent = DAYS[rowIndex];
-        tr.appendChild(dayTd);
+<!-- FFCS Add Modal -->
+<div class="modal modal-ffcs hidden" id="modal-add">
+  <button class="modal-x" id="modal-add-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-slot-tag" id="modal-slot-tag">A1 / L1</div>
+  <h3 class="modal-title">Add Course</h3>
+  <p class="modal-times" id="modal-times"></p>
+  <div class="mfields">
+    <div class="mrow">
+      <div class="mf"><label>Course Code</label><input id="m-code" placeholder="e.g. CSE1001"/></div>
+      <div class="mf mf-sm"><label>Credits</label><input id="m-credits" type="number" min="1" max="10" placeholder="5"/></div>
+    </div>
+    <div class="mf"><label>Course Title</label><input id="m-title" placeholder="e.g. Problem Solving and OOP"/></div>
+    <div class="mrow">
+      <div class="mf"><label>Faculty</label><input id="m-faculty" placeholder="Faculty name"/></div>
+      <div class="mf"><label>Venue</label><input id="m-venue" placeholder="e.g. SJT423"/></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="mbtn-cancel" id="modal-add-cancel">Cancel</button>
+    <button class="mbtn-primary" id="modal-add-save"><i class="fa-solid fa-plus"></i> Add Course</button>
+  </div>
+</div>
 
-        rowPayload.forEach((cellNode, colIndex) => {
-          if (cellNode === "LUNCH") {
-            const lunchBodyTd = document.createElement("td");
-            lunchBodyTd.className = "td-lunch-body";
-            tr.appendChild(lunchBodyTd);
-            return;
-          }
+<!-- FFCS Edit Modal -->
+<div class="modal modal-ffcs hidden" id="modal-edit">
+  <button class="modal-x" id="modal-edit-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-slot-tag" id="edit-slot-tag">A1</div>
+  <h3 class="modal-title">Edit Course</h3>
+  <div class="mfields">
+    <div class="mrow">
+      <div class="mf"><label>Course Code</label><input id="e-code"/></div>
+      <div class="mf mf-sm"><label>Credits</label><input id="e-credits" type="number" min="1" max="10"/></div>
+    </div>
+    <div class="mf"><label>Course Title</label><input id="e-title"/></div>
+    <div class="mrow">
+      <div class="mf"><label>Faculty</label><input id="e-faculty"/></div>
+      <div class="mf"><label>Venue</label><input id="e-venue"/></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="mbtn-danger" id="modal-edit-remove"><i class="fa-solid fa-trash"></i> Remove</button>
+    <button class="mbtn-cancel" id="modal-edit-cancel">Cancel</button>
+    <button class="mbtn-primary" id="modal-edit-save"><i class="fa-solid fa-check"></i> Save</button>
+  </div>
+</div>
 
-          const targetCell = document.createElement("td");
-          targetCell.className = (colIndex === 13) ? "td-v" : "td-cell";
-          
-          // Inject interactive listener bindings mapping context directly back to user
-          targetCell.addEventListener("click", () => handleGridIntersectionClick(targetCell, cellNode));
-          
-          evaluateAndFillCellDisplayState(targetCell, cellNode);
-          tr.appendChild(targetCell);
-        });
+<!-- Conflict Modal -->
+<div class="modal modal-sm hidden" id="modal-conflict">
+  <div class="modal-icon-big">⚠️</div>
+  <h3 class="modal-title">Slot Conflict</h3>
+  <p class="modal-msg" id="conflict-msg"></p>
+  <button class="mbtn-primary" style="width:100%" id="conflict-ok">Got it</button>
+</div>
 
-        targetTable.appendChild(tr);
-      });
-    }
+<!-- Reset Modal -->
+<div class="modal modal-sm hidden" id="modal-reset-confirm">
+  <div class="modal-icon-big">🗑️</div>
+  <h3 class="modal-title">Reset Timetable?</h3>
+  <p class="modal-msg">All courses will be permanently erased.</p>
+  <div class="modal-footer">
+    <button class="mbtn-cancel" id="reset-cancel">Cancel</button>
+    <button class="mbtn-danger" id="reset-ok">Yes, Reset</button>
+  </div>
+</div>
 
-    /**
-     * Evaluates cell slot contents to identify existing course matches
-     */
-    function evaluateAndFillCellDisplayState(cellElement, cellNode) {
-      let matchingCourse = null;
+<!-- Download Modal -->
+<div class="modal modal-sm hidden" id="modal-dl">
+  <div class="modal-icon-big">📥</div>
+  <h3 class="modal-title">Download</h3>
+  <div class="modal-footer" style="flex-direction:column;gap:10px;">
+    <button class="mbtn-primary" id="dl-print"><i class="fa-solid fa-print"></i> Save as PDF (Print)</button>
+    <button class="mbtn-cancel" id="dl-csv"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+    <button class="mbtn-ghost" id="dl-cancel">Cancel</button>
+  </div>
+</div>
 
-      // Locate if any currently registered active database array elements match this slot coordinate mapping
-      activeRegisteredCourses.forEach(course => {
-        const structuralSlots = course.slot.split("+").map(s => s.trim());
-        structuralSlots.forEach(slotToken => {
-          if ((cellNode.t && slotToken === cellNode.t) || (cellNode.l && slotToken === cellNode.l)) {
-            matchingCourse = course;
-          }
-        });
-      });
+<!-- TOAST -->
+<div class="toast hidden" id="toast"><span id="toast-msg"></span></div>
 
-      if (matchingCourse) {
-        cellElement.innerHTML = `
-          <div class="cell-filled">
-            <div class="cf-slot">${matchingCourse.slot}</div>
-            <div class="cf-name">${matchingCourse.code}</div>
-            <div class="cf-venue">${matchingCourse.venue || ""}</div>
-          </div>
-        `;
-      } else {
-        const textElements = [];
-        if (cellNode.t) textElements.push(cellNode.t);
-        if (cellNode.l) textElements.push(cellNode.l);
-        cellElement.innerHTML = `<span class="cell-default">${textElements.join(" / ")}</span>`;
-      }
-    }
-
-    /**
-     * Dispatches grid segment resolution when interactive element is clicked
-     */
-    function handleGridIntersectionClick(cellElement, cellNode) {
-      // Clear visual cursor pointers from layout
-      document.querySelectorAll(".td-cell, .td-v").forEach(el => el.classList.remove("active-selection"));
-      cellElement.classList.add("active-selection");
-
-      if (cellNode.t && cellNode.l) {
-        // Multi-tier complex resolution element tracking
-        triggerLayerSelectionModal(cellNode.t, cellNode.l);
-      } else {
-        const directTargetSlot = cellNode.t || cellNode.l;
-        const assignedType = cellNode.t ? "THEORY" : "LAB";
-        bindSlotToSystemState(directTargetSlot, assignedType);
-      }
-    }
-
-    /**
-     * Assigns active state coordinate configuration parameters back into working data pipeline
-     */
-    function bindSlotToSystemState(slotName, layerType) {
-      runtimeSelectedSlot = slotName;
-      runtimeSelectedType = layerType;
-
-      const tracker = document.getElementById("selected-slot-info");
-      tracker.innerHTML = `<strong>${slotName}</strong> [${layerType}]`;
-      
-      triggerSystemNotification(`Context pointer focused on slot: ${slotName}`, "info");
-      document.getElementById("inp-code").focus();
-    }
-
-    /**
-     * Modal display resolution pipeline for handling layered cells (Theory/Lab overlaps)
-     */
-    function triggerLayerSelectionModal(theoryOption, labOption) {
-      const modalOverlay = document.getElementById("modal-overlay");
-      const optionsBox = document.getElementById("modal-options-box");
-      
-      optionsBox.innerHTML = "";
-      modalOverlay.classList.add("active");
-
-      // Build Interactive Button Options inside Modal
-      const theoryBtn = document.createElement("button");
-      theoryBtn.className = "opt-btn";
-      theoryBtn.innerHTML = `<i class="fa-solid fa-graduation-cap" style="color: #7c3aed;"></i> Bind to Theory Class Slot: <strong>${theoryOption}</strong>`;
-      theoryBtn.onclick = () => {
-        bindSlotToSystemState(theoryOption, "THEORY");
-        closeSystemModal();
-      };
-
-      const labBtn = document.createElement("button");
-      labBtn.className = "opt-btn";
-      labBtn.innerHTML = `<i class="fa-solid fa-flask" style="color: #059669;"></i> Bind to Practical Lab Slot: <strong>${labOption}</strong>`;
-      labBtn.onclick = () => {
-        bindSlotToSystemState(labOption, "LAB");
-        closeSystemModal();
-      };
-
-      const cancelBtn = document.createElement("button");
-      cancelBtn.className = "opt-btn";
-      cancelBtn.style.color = "#dc2626";
-      cancelBtn.innerHTML = `<i class="fa-solid fa-xmark"></i> Abort Operation`;
-      cancelBtn.onclick = closeSystemModal;
-
-      optionsBox.appendChild(theoryBtn);
-      optionsBox.appendChild(labBtn);
-      optionsBox.appendChild(cancelBtn);
-    }
-
-    function closeSystemModal() {
-      document.getElementById("modal-overlay").classList.remove("active");
-    }
-
-    /**
-     * Processes input details and registers the course into the active timetable state
-     */
-    function processCourseCommit() {
-      const codeField = document.getElementById("inp-code");
-      const titleField = document.getElementById("inp-title");
-      const facultyField = document.getElementById("inp-faculty");
-      const venueField = document.getElementById("inp-venue");
-      const creditsField = document.getElementById("inp-credits");
-
-      const courseCode = codeField.value.trim().toUpperCase();
-      const courseTitle = titleField.value.trim();
-      const courseFaculty = facultyField.value.trim();
-      const courseVenue = venueField.value.trim().toUpperCase();
-      const courseCredits = parseInt(creditsField.value.trim(), 10);
-
-      // System Validations
-      if (!courseCode || !courseTitle) {
-        triggerSystemNotification("Validation Failure: Course Code and Title Descriptor are mandated.", "error");
-        return;
-      }
-      if (!runtimeSelectedSlot) {
-        triggerSystemNotification("Validation Failure: Click a grid coordinate space position first.", "error");
-        return;
-      }
-      if (isNaN(courseCredits) || courseCredits < 1 || courseCredits > 5) {
-        triggerSystemNotification("Validation Failure: Invalid credit values assigned.", "error");
-        return;
-      }
-
-      // Check for Slot Conflicts
-      let hasConflict = false;
-      activeRegisteredCourses.forEach(existingCourse => {
-        const structuralSlots = existingCourse.slot.split("+").map(s => s.trim());
-        if (structuralSlots.includes(runtimeSelectedSlot)) {
-          hasConflict = true;
-        }
-      });
-
-      if (hasConflict) {
-        triggerSystemNotification(`Conflict Exception: Slot ${runtimeSelectedSlot} is already allocated!`, "error");
-        return;
-      }
-
-      // Assembly Node Object Construction
-      const computedRegistrationPayload = {
-        id: "REG_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
-        code: courseCode,
-        title: courseTitle,
-        faculty: courseFaculty || "TBD Staff",
-        venue: courseVenue || "N/A",
-        credits: courseCredits,
-        slot: runtimeSelectedSlot,
-        type: runtimeSelectedType
-      };
-
-      activeRegisteredCourses.push(computedRegistrationPayload);
-      writeStateToStorage();
-      
-      // Re-render Interfaces
-      buildAndRenderTimetableGrid();
-      syncCourseListInterface();
-      clearFormInputFields();
-      
-      triggerSystemNotification(`Successfully linked ${courseCode} to Slot ${runtimeSelectedSlot}`, "success");
-    }
-
-    /**
-     * Synchronizes and updates the table summarizing registered course assets
-     */
-    function syncCourseListInterface() {
-      const listBody = document.getElementById("courselist-body");
-      const totalCreditsDisplay = document.getElementById("total-credits");
-      
-      listBody.innerHTML = "";
-      let runtimeAggregatedCredits = 0;
-
-      if (activeRegisteredCourses.length === 0) {
-        listBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; font-style: italic;">No courses bound to schema. Click table matrix cell elements above to insert entries.</td></tr>`;
-        totalCreditsDisplay.textContent = "0";
-        return;
-      }
-
-      activeRegisteredCourses.forEach(course => {
-        runtimeAggregatedCredits += course.credits;
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-          <td><strong>${course.slot}</strong></td>
-          <td>${course.code}</td>
-          <td>${course.title}</td>
-          <td>${course.faculty}</td>
-          <td><code>${course.venue}</code></td>
-          <td>${course.credits}</td>
-          <td style="text-align: center;">
-            <button class="btn-delete-course" onclick="removeCourseNodeById('${course.id}')" title="Drop course context element">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </td>
-        `;
-        listBody.appendChild(row);
-      });
-
-      totalCreditsDisplay.textContent = runtimeAggregatedCredits;
-    }
-
-    /**
-     * Drops course elements out of state by identifier index mapping definitions
-     */
-    function removeCourseNodeById(targetId) {
-      activeRegisteredCourses = activeRegisteredCourses.filter(course => course.id !== targetId);
-      writeStateToStorage();
-      buildAndRenderTimetableGrid();
-      syncCourseListInterface();
-      triggerSystemNotification("Course payload context successfully unlinked", "info");
-    }
-
-    /**
-     * Clear and refresh input fields
-     */
-    function clearFormInputFields() {
-      document.getElementById("inp-code").value = "";
-      document.getElementById("inp-title").value = "";
-      document.getElementById("inp-faculty").value = "";
-      document.getElementById("inp-venue").value = "";
-      document.getElementById("inp-credits").value = "4";
-      
-      // Reset selection pointer pointers
-      runtimeSelectedSlot = null;
-      runtimeSelectedType = null;
-      document.getElementById("selected-slot-info").textContent = "Select a grid space cell below";
-      document.querySelectorAll(".td-cell, .td-v").forEach(el => el.classList.remove("active-selection"));
-    }
-
-    /**
-     * System Data Persistence Control Pipes
-     */
-    function writeStateToStorage() {
-      localStorage.setItem("FFCS_OTG_DATA_PERSISTENCE", JSON.stringify(activeRegisteredCourses));
-    }
-
-    function syncStateFromStorage() {
-      const standardInputCache = localStorage.getItem("FFCS_OTG_DATA_PERSISTENCE");
-      if (standardInputCache) {
-        try {
-          activeRegisteredCourses = JSON.parse(standardInputCache);
-        } catch (e) {
-          activeRegisteredCourses = [];
-        }
-      }
-    }
-
-    /**
-     * Triggers clean initialization wiped state resets
-     */
-    function triggerSystemReset() {
-      if (confirm("Are you sure you want to flush all custom timetable data entries? This action is irreversible.")) {
-        localStorage.removeItem("FFCS_OTG_DATA_PERSISTENCE");
-        activeRegisteredCourses = [];
-        clearFormInputFields();
-        buildAndRenderTimetableGrid();
-        syncCourseListInterface();
-        triggerSystemNotification("Application state hard reset executed complete.", "info");
-      }
-    }
-
-    /**
-     * Exports active allocation settings parameters array matrix configuration data schemas as standard output
-     */
-    function exportTimetableSchema() {
-      if (activeRegisteredCourses.length === 0) {
-        triggerSystemNotification("Export Operation Aborted: Data schema payload buffer context is blank.", "error");
-        return;
-      }
-      const structuredDataBlob = new Blob([JSON.stringify(activeRegisteredCourses, null, 2)], {type: "application/json"});
-      const executionAnchor = document.createElement("a");
-      executionAnchor.href = URL.createObjectURL(structuredDataBlob);
-      executionAnchor.download = "FFCS_OnTheGo_Schema_" + Date.now() + ".json";
-      document.body.appendChild(executionAnchor);
-      executionAnchor.click();
-      document.body.removeChild(executionAnchor);
-      triggerSystemNotification("Schema JSON package file dispatch sequence finished.", "success");
-    }
-
-    /**
-     * Centralized notification pipeline system
-     */
-    function triggerSystemNotification(messagePayloadText, messageCategory = "info") {
-      const toastNode = document.getElementById("toast");
-      const toastMsgSpan = document.getElementById("toast-msg");
-      const iconNode = document.getElementById("toast-icon");
-
-      toastMsgSpan.textContent = messagePayloadText;
-      
-      // Setup stylistic conditions category markers
-      if (messageCategory === "success") {
-        iconNode.className = "fa-solid fa-circle-check";
-        toastNode.style.borderLeft = "4px solid #10b981";
-      } else if (messageCategory === "error") {
-        iconNode.className = "fa-solid fa-circle-exclamation";
-        toastNode.style.borderLeft = "4px solid #ef4444";
-      } else {
-        iconNode.className = "fa-solid fa-circle-info";
-        toastNode.style.borderLeft = "4px solid #a78bfa";
-      }
-
-      toastNode.classList.add("show");
-      
-      setTimeout(() => {
-        toastNode.classList.remove("show");
-      }, 4000);
-    }
-  </script>
+<script src="app.js"></script>
 </body>
 </html>
