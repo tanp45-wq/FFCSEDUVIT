@@ -1,0 +1,88 @@
+<!-- MODALS -->
+<div class="overlay hidden" id="overlay"></div>
+
+<!-- FFCS Add Modal -->
+<div class="modal modal-ffcs hidden" id="modal-add">
+  <button class="modal-x" id="modal-add-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-slot-tag" id="modal-slot-tag">A1 / L1</div>
+  <h3 class="modal-title">Add Course</h3>
+  <p class="modal-times" id="modal-times"></p>
+  <div class="mfields">
+    <div class="mrow">
+      <div class="mf"><label>Course Code</label><input id="m-code" placeholder="e.g. CSE1001"/></div>
+      <div class="mf mf-sm"><label>Credits</label><input id="m-credits" type="number" min="1" max="10" placeholder="5"/></div>
+    </div>
+    <div class="mf"><label>Course Title</label><input id="m-title" placeholder="e.g. Problem Solving and OOP"/></div>
+    <div class="mrow">
+      <div class="mf"><label>Faculty</label><input id="m-faculty" placeholder="Faculty name"/></div>
+      <div class="mf"><label>Venue</label><input id="m-venue" placeholder="e.g. SJT423"/></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="mbtn-cancel" id="modal-add-cancel">Cancel</button>
+    <button class="mbtn-primary" id="modal-add-save"><i class="fa-solid fa-plus"></i> Add Course</button>
+  </div>
+</div>
+
+<!-- FFCS Edit Modal -->
+<div class="modal modal-ffcs hidden" id="modal-edit">
+  <button class="modal-x" id="modal-edit-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-slot-tag" id="edit-slot-tag">A1</div>
+  <h3 class="modal-title">Edit Course</h3>
+  <div class="mfields">
+    <div class="mrow">
+      <div class="mf"><label>Course Code</label><input id="e-code"/></div>
+      <div class="mf mf-sm"><label>Credits</label><input id="e-credits" type="number" min="1" max="10"/></div>
+    </div>
+    <div class="mf"><label>Course Title</label><input id="e-title"/></div>
+    <div class="mrow">
+      <div class="mf"><label>Faculty</label><input id="e-faculty"/></div>
+      <div class="mf"><label>Venue</label><input id="e-venue"/></div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="mbtn-danger" id="modal-edit-remove"><i class="fa-solid fa-trash"></i> Remove</button>
+    <button class="mbtn-cancel" id="modal-edit-cancel">Cancel</button>
+    <button class="mbtn-primary" id="modal-edit-save"><i class="fa-solid fa-check"></i> Save</button>
+  </div>
+</div>
+
+<!-- Suggest Slots Modal -->
+<div class="modal hidden" id="modal-suggestions">
+  <button class="modal-x" id="modal-suggest-close"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal-icon-big">✨</div>
+  <h3 class="modal-title">Available Slots</h3>
+  <p class="modal-msg">These slots are currently free of any conflicts:</p>
+  <div id="suggested-slots-list" class="suggestion-tag-grid"></div>
+  <button class="mbtn-primary" style="width:100%; margin-top:20px;" id="suggest-ok">Close</button>
+</div>
+
+<!-- Conflict Modal -->
+<div class="modal modal-sm hidden" id="modal-conflict">
+  <div class="modal-icon-big">⚠️</div>
+  <h3 class="modal-title">Slot Conflict</h3>
+  <p class="modal-msg" id="conflict-msg"></p>
+  <button class="mbtn-primary" style="width:100%" id="conflict-ok">Got it</button>
+</div>
+
+<!-- Reset Modal -->
+<div class="modal modal-sm hidden" id="modal-reset-confirm">
+  <div class="modal-icon-big">🗑️</div>
+  <h3 class="modal-title">Reset Timetable?</h3>
+  <p class="modal-msg">All courses will be permanently erased.</p>
+  <div class="modal-footer">
+    <button class="mbtn-cancel" id="reset-cancel">Cancel</button>
+    <button class="mbtn-danger" id="reset-ok">Yes, Reset</button>
+  </div>
+</div>
+
+<!-- Download Modal -->
+<div class="modal modal-sm hidden" id="modal-dl">
+  <div class="modal-icon-big">📥</div>
+  <h3 class="modal-title">Download</h3>
+  <div class="modal-footer" style="flex-direction:column;gap:10px;">
+    <button class="mbtn-primary" id="dl-print"><i class="fa-solid fa-print"></i> Save as PDF (Print)</button>
+    <button class="mbtn-cancel" id="dl-csv"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+    <button class="mbtn-ghost" id="dl-cancel">Cancel</button>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<section class="section" id="sec-cgpa">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge cgpa-badge">02</span>
+      <h2>CGPA / GPA Calculator</h2>
+    </div>
+  </div>
+
+  <div class="cgpa-layout">
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-calculator"></i> Semester GPA</h3>
+      <p class="cgpa-card-sub">Add your courses for this semester to calculate GPA</p>
+      <div id="gpa-courses"></div>
+      <button class="btn-add-row" id="btn-add-gpa-course"><i class="fa-solid fa-plus"></i> Add Course</button>
+      <div class="cgpa-result-row">
+        <div class="cgpa-result-box"><div class="crb-label">Semester GPA</div><div class="crb-val" id="gpa-result">—</div></div>
+        <div class="cgpa-result-box"><div class="crb-label">Total Credits</div><div class="crb-val" id="gpa-credits">0</div></div>
+        <div class="cgpa-result-box"><div class="crb-label">Grade</div><div class="crb-val" id="gpa-grade">—</div></div>
+      </div>
+      <button class="btn-calc" onclick="calcGPA()"><i class="fa-solid fa-bolt"></i> Calculate GPA</button>
+    </div>
+
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-chart-line"></i> Cumulative CGPA</h3>
+      <p class="cgpa-card-sub">Enter GPA and credits for each semester</p>
+      <div id="cgpa-sems"></div>
+      <button class="btn-add-row" id="btn-add-sem"><i class="fa-solid fa-plus"></i> Add Semester</button>
+      <div class="cgpa-result-row">
+        <div class="cgpa-result-box"><div class="crb-label">Cumulative CGPA</div><div class="crb-val" id="cgpa-result">—</div></div>
+        <div class="cgpa-result-box"><div class="crb-label">Total Credits</div><div class="crb-val" id="cgpa-total-cr">0</div></div>
+        <div class="cgpa-result-box"><div class="crb-label">Classification</div><div class="crb-val" id="cgpa-class">—</div></div>
+      </div>
+      <button class="btn-calc" onclick="calcCGPA()"><i class="fa-solid fa-bolt"></i> Calculate CGPA</button>
+    </div>
+
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-bullseye"></i> Target GPA Predictor</h3>
+      <p class="cgpa-card-sub">Find the GPA you need in remaining semesters to hit your target CGPA</p>
+      <div class="pred-grid">
+        <div class="pred-field"><label>Current CGPA</label><input type="number" id="pred-curr" step="0.01" min="0" max="10" placeholder="e.g. 8.2"/></div>
+        <div class="pred-field"><label>Credits Completed</label><input type="number" id="pred-done-cr" min="0" placeholder="e.g. 120"/></div>
+        <div class="pred-field"><label>Target CGPA</label><input type="number" id="pred-target" step="0.01" min="0" max="10" placeholder="e.g. 9.0"/></div>
+        <div class="pred-field"><label>Remaining Credits</label><input type="number" id="pred-rem-cr" min="0" placeholder="e.g. 60"/></div>
+      </div>
+      <button class="btn-calc" onclick="calcPredictor()"><i class="fa-solid fa-bolt"></i> Predict</button>
+      <div class="pred-result hidden" id="pred-result-box">
+        <div class="pred-res-label">Required GPA in remaining semesters</div>
+        <div class="pred-res-val" id="pred-res-val">—</div>
+        <div class="pred-res-msg" id="pred-res-msg"></div>
+      </div>
+    </div>
+
+    <div class="cgpa-card">
+      <h3 class="cgpa-card-title"><i class="fa-solid fa-table"></i> VIT Grade Scale</h3>
+      <table class="grade-table">
+        <thead><tr><th>Grade</th><th>Points</th><th>Range</th></tr></thead>
+        <tbody>
+          <tr><td>S</td><td>10</td><td>≥ 90</td></tr>
+          <tr><td>A+</td><td>9</td><td>80 – 89</td></tr>
+          <tr><td>A</td><td>8</td><td>70 – 79</td></tr>
+          <tr><td>B+</td><td>7</td><td>60 – 69</td></tr>
+          <tr><td>B</td><td>6</td><td>50 – 59</td></tr>
+          <tr><td>C</td><td>5</td><td>40 – 49</td></tr>
+          <tr><td>F</td><td>0</td><td>&lt; 40</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

@@ -1,13 +1,4 @@
-/* ============================================================
-   data-pyq.js
-   Source: papers.codechefvit.com  (CodeChef-VIT, MIT license)
-   All paper metadata extracted and stored locally.
-   PDF links point back to Google Cloud Storage via the original
-   site — download them once and replace the url field with your
-   own hosted path to go fully offline.
-   ============================================================ */
-
-const PYQ_PAPERS = [
+export const PYQ_PAPERS = [
 
   /* ── SCOPE (CS) ─────────────────────────────────────────── */
 
@@ -197,12 +188,3 @@ const PYQ_PAPERS = [
   { id:"p111", code:"BENG101L", subject:"Technical English for Engineers", slot:"V1", dept:"SAS", type:"FAT",  year:2024, hasKey:false, url:"https://papers.codechefvit.com/paper/BENG101L-FAT-2024" },
 
 ];
-
-/* Helper lookup */
-const PYQ_UNIQUE_SUBJECTS = [...new Set(PYQ_PAPERS.map(p => p.subject))].sort();
-const PYQ_UNIQUE_CODES    = [...new Set(PYQ_PAPERS.map(p => p.code))].sort();
-const PYQ_UNIQUE_DEPTS    = [...new Set(PYQ_PAPERS.map(p => p.dept))].sort();
-const PYQ_YEARS           = [2024, 2023, 2022];
-const PYQ_TYPES           = ["CAT1","CAT2","FAT"];
-
-if (typeof module !== "undefined") module.exports = { PYQ_PAPERS, PYQ_UNIQUE_SUBJECTS, PYQ_UNIQUE_CODES };

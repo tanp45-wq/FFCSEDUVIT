@@ -1,0 +1,36 @@
+<section class="section" id="sec-nptel">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge nptel-badge">03</span>
+      <h2>NPTEL Practice</h2>
+    </div>
+  </div>
+
+  <div class="nptel-stats-row">
+    <div class="nstat"><span class="nstat-n">25</span><span class="nstat-l">Courses</span></div>
+    <div class="nstat"><span class="nstat-n">3200+</span><span class="nstat-l">Questions</span></div>
+    <div class="nstat"><span class="nstat-n">300+</span><span class="nstat-l">Weeks Content</span></div>
+    <div class="nstat"><span class="nstat-n">65K+</span><span class="nstat-l">Users</span></div>
+  </div>
+
+  <div id="nptel-home">
+    <div class="nptel-search-row">
+      <input type="text" id="nptel-search" placeholder="Search NPTEL courses..." oninput="filterNptel()"/>
+    </div>
+    <div class="nptel-grid" id="nptel-grid"></div>
+  </div>
+
+  <div class="nptel-quiz-view hidden" id="nptel-quiz-view">
+    <button class="back-btn" onclick="closeNptelQuiz()"><i class="fa-solid fa-arrow-left"></i> All Courses</button>
+    <div class="quiz-header">
+      <h3 id="quiz-course-title"></h3>
+      <div class="quiz-mode-btns">
+        <button class="qmode-btn active" id="qm-week" onclick="setQuizMode('week')">By Week</button>
+        <button class="qmode-btn" id="qm-full" onclick="setQuizMode('full')">Full Quiz</button>
+      </div>
+    </div>
+    <div class="quiz-body" id="quiz-body"></div>
+    <div class="quiz-external-link" id="quiz-ext-link"></div>
+  </div>
+</section>

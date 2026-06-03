@@ -1,11 +1,4 @@
-/* ============================================================
-   data-mis.js
-   Source: vitmisqube.netlify.app (by Mohammed Kaif K)
-   M.Tech Integrated Software Engineering — VIT Vellore
-   All paper metadata structured and stored locally.
-   ============================================================ */
-
-const MIS_PAPERS = [
+export const MIS_PAPERS = [
 
   /* ══════════════════════════════
      SEMESTER 1
@@ -192,9 +185,3 @@ const MIS_PAPERS = [
   { id:"m129", code:"BCSE507L", subject:"Quantum Computing",                                 sem:6, type:"FAT",  year:2024, hasKey:false },
 
 ];
-
-const MIS_SEMESTERS = [1,2,3,4,5,6];
-const MIS_YEARS     = [2024,2023,2022];
-const MIS_TYPES     = ["CAT1","CAT2","FAT"];
-
-if (typeof module !== "undefined") module.exports = { MIS_PAPERS, MIS_SEMESTERS };
