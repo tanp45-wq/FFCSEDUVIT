@@ -1,819 +1,766 @@
-/* ════════════════════════════════════════════════════════════
-   CORE STRUCTURAL STATE ARRAYS
-   ════════════════════════════════════════════════════════════ */
-const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
-const THEORY_TIMES = ["08:00-08:50", "09:00-09:50", "10:00-10:50", "11:00-11:50", "12:00-12:50", "01:30-02:20", "02:30-03:20", "03:30-04:20", "04:30-05:20", "05:30-06:20"];
-const LAB_TIMES = ["L1-L2", "L3-L4", "L5-L6", "L7-L8", "L9-L10", "L11-L12", "L31-L32", "L33-L34", "L35-L36", "L37-L38", "L39-L40", "L41-L42"];
+/* =========================================================
+   EduHub VIT — app.js  (Clean, fully working)
+   ========================================================= */
 
-// FFCS Matrix mapping layout representation
-const FFCS_MATRIX = [
-    [{t:"A1",l:"L1"}, {t:"F1",l:"L2"}, {t:"D1",l:"L3"}, {t:"TB1",l:"L4"}, {t:"TG1",l:"L5"}, {l:"L6"}, "LUNCH", {t:"A2",l:"L31"}, {t:"F2",l:"L32"}, {t:"D2",l:"L33"}, {t:"TB2",l:"L34"}, {t:"TG2",l:"L35"}, {l:"L36"}, {t:"V3",l:"X1"}],
-    [{t:"B1",l:"L7"}, {t:"G1",l:"L8"}, {t:"E1",l:"L9"}, {t:"TC1",l:"L10"}, {t:"TAA1",l:"L11"}, {l:"L12"}, "LUNCH", {t:"B2",l:"L37"}, {t:"G2",l:"L38"}, {t:"E2",l:"L39"}, {t:"TC2",l:"L40"}, {t:"TAA2",l:"L41"}, {l:"L42"}, {t:"V4",l:"X2"}],
-    [{t:"C1",l:"L13"}, {t:"A1",l:"L14"}, {t:"F1",l:"L15"}, {t:"TD1",l:"L16"}, {t:"TBB1",l:"L17"}, {l:"L18"}, "LUNCH", {t:"C2",l:"L43"}, {t:"A2",l:"L44"}, {t:"F2",l:"L45"}, {t:"TD2",l:"L46"}, {t:"TBB2",l:"L47"}, {l:"L48"}, {t:"V5",l:"X3"}],
-    [{t:"D1",l:"L19"}, {t:"B1",l:"L20"}, {t:"G1",l:"L21"}, {t:"TE1",l:"L22"}, {t:"TCC1",l:"L23"}, {l:"L24"}, "LUNCH", {t:"D2",l:"L49"}, {t:"B2",l:"L50"}, {t:"G2",l:"L51"}, {t:"TE2",l:"L52"}, {t:"TCC2",l:"L53"}, {l:"L54"}, {t:"V6",l:"X4"}],
-    [{t:"E1",l:"L25"}, {t:"C1",l:"L26"}, {t:"B1",l:"L27"}, {t:"TF1",l:"L28"}, {t:"TDD1",l:"L29"}, {l:"L30"}, "LUNCH", {t:"E2",l:"L55"}, {t:"C2",l:"L56"}, {t:"B2",l:"L57"}, {t:"TF2",l:"L58"}, {t:"TDD2",l:"L59"}, {l:"L60"}, {t:"V7",l:"X5"}]
+'use strict';
+
+/* ══════════════════════════════════════════════════════════
+   CURSOR
+   ══════════════════════════════════════════════════════════ */
+const cursor = document.getElementById('cursor');
+const cursorTrail = document.getElementById('cursor-trail');
+let mx = 0, my = 0, tx = 0, ty = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  tx += (mx - tx) * 0.18;
+  ty += (my - ty) * 0.18;
+  if (cursor) { cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; }
+  if (cursorTrail) { cursorTrail.style.left = tx + 'px'; cursorTrail.style.top = ty + 'px'; }
+  requestAnimationFrame(animCursor);
+})();
+
+/* ══════════════════════════════════════════════════════════
+   SECTION NAVIGATION
+   ══════════════════════════════════════════════════════════ */
+const SECTION_MAP = { home: 'sec-home', ffcs: 'sec-ffcs', cgpa: 'sec-cgpa', nptel: 'sec-nptel', pyq: 'sec-pyq' };
+
+function showSection(key) {
+  Object.values(SECTION_MAP).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const target = document.getElementById(SECTION_MAP[key]);
+  if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg, type = 'info') {
+  const toast = document.getElementById('toast');
+  const span = document.getElementById('toast-msg');
+  if (!toast || !span) return;
+  span.textContent = msg;
+  toast.style.borderLeft = type === 'success' ? '3px solid #34d399' : type === 'error' ? '3px solid #f87171' : '3px solid #a78bfa';
+  toast.classList.remove('hidden');
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 350); }, 3500);
+}
+
+/* ══════════════════════════════════════════════════════════
+   OVERLAY / MODAL HELPERS
+   ══════════════════════════════════════════════════════════ */
+function openModal(id) {
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById(id);
+  if (overlay) overlay.classList.remove('hidden');
+  if (modal) modal.classList.remove('hidden');
+}
+function closeModal(id) {
+  const overlay = document.getElementById('overlay');
+  const modal = document.getElementById(id);
+  if (overlay) overlay.classList.add('hidden');
+  if (modal) modal.classList.add('hidden');
+}
+function closeAllModals() {
+  document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+  const overlay = document.getElementById('overlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+document.getElementById('overlay')?.addEventListener('click', closeAllModals);
+
+/* ══════════════════════════════════════════════════════════
+   FFCS — VIT TIMETABLE DATA
+   ══════════════════════════════════════════════════════════ */
+
+// Each row: [DAY_LABEL, ...cells]
+// Each cell: { t: theorySlot, l: labSlot } or { t } or { l } or null (lunch)
+const TT_THEORY_HEADERS = ['8:00–8:50','8:55–9:45','LUNCH','9:50–10:40','10:45–11:35','11:40–12:30','12:35–1:25','LUNCH','1:30–2:20','2:25–3:15','3:20–4:10','4:15–5:05'];
+const TT_LAB_HEADERS    = ['8:00–9:30','','LUNCH','9:55–11:25','','11:30–13:00','','LUNCH','13:30–15:00','','15:05–16:35',''];
+
+// Timetable cell definitions [theory_slot, lab_slot] (null = lunch divider)
+const TT_ROWS = [
+  { day:'MON', cells:[{t:'A1',l:'L1'},{t:'F1',l:'L2'},null,{t:'D1',l:'L3'},{t:'TB1',l:'L4'},{t:'TG1',l:'L5'},null,null,{t:'A2',l:'L31'},{t:'F2',l:'L32'},{t:'D2',l:'L33'},{t:'TB2',l:'L34'}] },
+  { day:'TUE', cells:[{t:'B1',l:'L7'},{t:'G1',l:'L8'},null,{t:'E1',l:'L9'},{t:'TC1',l:'L10'},{t:'TAI1',l:'L11'},null,null,{t:'B2',l:'L37'},{t:'G2',l:'L38'},{t:'E2',l:'L39'},{t:'TC2',l:'L40'}] },
+  { day:'WED', cells:[{t:'C1',l:'L13'},{t:'A1',l:'L14'},null,{t:'F1',l:'L15'},{t:'TD1',l:'L16'},{t:'TH1',l:'L17'},null,null,{t:'C2',l:'L43'},{t:'A2',l:'L44'},{t:'F2',l:'L45'},{t:'TD2',l:'L46'}] },
+  { day:'THU', cells:[{t:'D1',l:'L19'},{t:'B1',l:'L20'},null,{t:'G1',l:'L21'},{t:'TE1',l:'L22'},{t:'TAJ1',l:'L23'},null,null,{t:'D2',l:'L49'},{t:'B2',l:'L50'},{t:'G2',l:'L51'},{t:'TE2',l:'L52'}] },
+  { day:'FRI', cells:[{t:'E1',l:'L25'},{t:'C1',l:'L26'},null,{t:'A1',l:'L27'},{t:'TF1',l:'L28'},{t:'TAK1',l:'L29'},null,null,{t:'E2',l:'L55'},{t:'C2',l:'L56'},{t:'A2',l:'L57'},{t:'TF2',l:'L58'}] },
+  { day:'SAT', cells:[{t:'F1',l:null},{t:'D1',l:null},null,{t:'B1',l:null},{t:'G1',l:null},{t:'A1',l:null},null,null,{t:'F2',l:null},{t:'D2',l:null},{t:'B2',l:null},{t:'G2',l:null}] },
 ];
 
-// Pre-seeded Database Repositories
-const NPTEL_DATA = [
-    { id: 1, title: "Data Structures And Algorithms Using Java", weeks: 12, questions: 150 },
-    { id: 2, title: "Database Management System", weeks: 8, questions: 120 },
-    { id: 3, title: "Computer Networks", weeks: 12, questions: 180 },
-    { id: 4, title: "Introduction to Automata, Languages and Computation", weeks: 12, questions: 140 },
-    { id: 5, title: "Software Engineering", weeks: 8, questions: 100 }
-];
+let courses = loadCourses();
 
-const PYQ_DATA = [
-    // Computer Science Core
-    { code: "CSE2001", name: "Computer Architecture and Organization", type: "CAT1", year: 2024, slot: "A1+TA1" },
-    { code: "CSE2001", name: "Computer Architecture and Organization", type: "CAT2", year: 2024, slot: "A1+TA1" },
-    { code: "CSE2001", name: "Computer Architecture and Organization", type: "FAT", year: 2023, slot: "A2+TA2" },
-    { code: "CSE1007", name: "Java Programming", type: "FAT", year: 2023, slot: "L11+L12" },
-    { code: "CSE1007", name: "Java Programming", type: "CAT1", year: 2024, slot: "L31+L32" },
-    { code: "CSE2003", name: "Data Structures and Algorithms", type: "CAT2", year: 2024, slot: "E2+TE2" },
-    { code: "CSE2003", name: "Data Structures and Algorithms", type: "FAT", year: 2023, slot: "E1+TE1" },
-    { code: "CSE2005", name: "Operating Systems", type: "CAT1", year: 2023, slot: "B1+TB1" },
-    { code: "CSE2004", name: "Database Management Systems", type: "FAT", year: 2024, slot: "B2+TB2" },
-    { code: "CSE3002", name: "Compiler Design", type: "FAT", year: 2022, slot: "D2+TD2" },
-    { code: "CSE3001", name: "Software Engineering", type: "CAT2", year: 2023, slot: "F1+TF1" },
-    { code: "CSE4001", name: "Internet of Things", type: "FAT", year: 2021, slot: "V1" },
-    { code: "CSE2006", name: "Microprocessor and Interfacing", type: "CAT1", year: 2023, slot: "D2+TD2" },
-    { code: "CSE3006", name: "Embedded System Design", type: "FAT", year: 2022, slot: "E1+TE1" },
-    { code: "CSE1002", name: "Problem Solving and OOP", type: "CAT1", year: 2024, slot: "L1+L2" },
-    { code: "CSE2013", name: "Theory of Computation", type: "FAT", year: 2024, slot: "C1+TC1" },
-    { code: "CSE3501", name: "Information Security Analysis", type: "CAT1", year: 2024, slot: "F2+TF2" },
-    { code: "CSE2011", name: "Cyber Security", type: "FAT", year: 2024, slot: "V5" },
-    { code: "CSE1004", name: "Network and Communication", type: "FAT", year: 2023, slot: "G1+TG1" },
-    { code: "CSE3005", name: "Foundations of Data Analytics", type: "CAT1", year: 2024, slot: "A2+TA2" },
-    { code: "CSE4001", name: "Parallel and Distributed Computing", type: "CAT2", year: 2023, slot: "B1+TB1" },
-    { code: "CSE1006", name: "Blockchain and Cryptocurrency", type: "FAT", year: 2024, slot: "E1+TE1" },
-    { code: "CSE4019", name: "Digital Image Processing", type: "CAT1", year: 2023, slot: "G2+TG2" },
-    { code: "CSE4015", name: "Human Computer Interaction", type: "FAT", year: 2022, slot: "V3" },
-    
-    // Mathematics
-    { code: "MAT2001", name: "Statistics for Engineers", type: "CAT2", year: 2024, slot: "C1+TC1" },
-    { code: "MAT1011", name: "Calculus for Engineers", type: "CAT1", year: 2024, slot: "D1+TD1" },
-    { code: "MAT2002", name: "Discrete Mathematics", type: "CAT2", year: 2024, slot: "C2+TC2" },
-    { code: "MAT3004", name: "Applied Linear Algebra", type: "CAT1", year: 2023, slot: "A1+TA1" },
-    { code: "MAT1011", name: "Calculus for Engineers", type: "FAT", year: 2023, slot: "D2+TD2" },
-    { code: "MAT3003", name: "Probability and Statistics", type: "CAT1", year: 2024, slot: "F1+TF1" },
-    { code: "MAT3005", name: "Differential Equations", type: "FAT", year: 2023, slot: "G1+TG1" },
-    
-    // General Sciences
-    { code: "PHY1701", name: "Engineering Physics", type: "CAT1", year: 2022, slot: "A2+TA2" },
-    { code: "CHY1701", name: "Engineering Chemistry", type: "CAT1", year: 2022, slot: "E2+TE2" },
-    { code: "PHY1901", name: "Introduction to Innovative Projects", type: "FAT", year: 2023, slot: "V1" },
-    
-    // Humanities & Management
-    { code: "STS2001", name: "Reasoning Skill Enhancement", type: "FAT", year: 2023, slot: "V3" },
-    { code: "MGT1022", name: "Lean Start-up Management", type: "CAT2", year: 2022, slot: "B1+TB1" },
-    { code: "ENG1901", name: "Advanced Technical English", type: "CAT2", year: 2024, slot: "V6" },
-    { code: "HUM1021", name: "Ethics and Values", type: "FAT", year: 2022, slot: "V2" },
-    
-    // Electives
-    { code: "ECE1001", name: "Fundamentals of ECE", type: "CAT1", year: 2024, slot: "G1+TG1" },
-    { code: "EEE1001", name: "Basic Electrical Engineering", type: "FAT", year: 2023, slot: "B1+TB1" },
-    { code: "ECE2002", name: "Digital Logic Design", type: "CAT1", year: 2024, slot: "D2+TD2" },
-    { code: "BIT1001", name: "Introduction to Bio-Sciences", type: "FAT", year: 2023, slot: "V4" }
-];
+function loadCourses() {
+  try { return JSON.parse(localStorage.getItem('eduhub_vit_courses') || '[]'); } catch { return []; }
+}
+function saveCourses() {
+  localStorage.setItem('eduhub_vit_courses', JSON.stringify(courses));
+}
+function getCourseForSlot(slot) {
+  return courses.find(c => c.slots.includes(slot)) || null;
+}
 
-// Application State Parameters
-let savedPlacements = JSON.parse(localStorage.getItem('eduhub_ffcs_slots')) || [];
-let currentQuizTarget = null;
-let currentQuizViewMode = "week";
-let selectedTargetCell = null;
+/* ── Build Timetable ── */
+function buildTimetable() {
+  const table = document.getElementById('timetable');
+  if (!table) return;
+  table.innerHTML = '';
 
-/* ════════════════════════════════════════════════════════════
-   CORE STRUCTURAL ENGINE INITIALIZATION
-   ════════════════════════════════════════════════════════════ */
-document.addEventListener("DOMContentLoaded", () => {
-    initCursor();
-    initTimetableStructure();
-    renderTimetableData();
-    initCgpaDefaultRows();
-    renderNptelGrid();
-    renderPyqGrid();
-    setupPyqFilters();
-    initModalClosers();
+  // Theory header
+  const thead1 = table.createTHead();
+  const theoryRow = thead1.insertRow();
+  theoryRow.className = 'theory-head';
+  const dayTh1 = document.createElement('th');
+  dayTh1.textContent = 'Day';
+  dayTh1.rowSpan = 2;
+  dayTh1.style.background = 'var(--surface2)';
+  theoryRow.appendChild(dayTh1);
+  TT_THEORY_HEADERS.forEach((h, i) => {
+    const th = document.createElement('th');
+    if (h === 'LUNCH') { th.textContent = 'LUNCH'; th.className = 'td-lunch'; th.rowSpan = 2; }
+    else { th.textContent = h; }
+    theoryRow.appendChild(th);
+  });
+
+  // Lab header — skip lunch columns (already rowspan 2)
+  const labRow = thead1.insertRow();
+  labRow.className = 'lab-head';
+  TT_LAB_HEADERS.forEach((h, i) => {
+    if (TT_THEORY_HEADERS[i] === 'LUNCH') return; // rowspan already
+    const th = document.createElement('th');
+    th.textContent = h;
+    labRow.appendChild(th);
+  });
+
+  // Body
+  const tbody = table.createTBody();
+  TT_ROWS.forEach(rowDef => {
+    const tr = tbody.insertRow();
+    const dayCell = tr.insertCell();
+    dayCell.textContent = rowDef.day;
+    dayCell.className = 'td-day';
+
+    rowDef.cells.forEach((cell, ci) => {
+      const td = tr.insertCell();
+      if (cell === null) {
+        td.className = 'td-lunch';
+        td.textContent = '';
+        return;
+      }
+      td.className = 'td-cell';
+      renderCell(td, cell);
+      td.addEventListener('click', () => handleCellClick(td, cell));
+      td.addEventListener('dblclick', () => handleCellDblClick(td, cell));
+    });
+  });
+}
+
+function renderCell(td, cell) {
+  // Check if theory slot is filled
+  const theoryFill = cell.t ? getCourseForSlot(cell.t) : null;
+  const labFill = cell.l ? getCourseForSlot(cell.l) : null;
+  const fill = theoryFill || labFill;
+
+  if (fill) {
+    const filledSlot = theoryFill ? cell.t : cell.l;
+    td.innerHTML = `<div class="cell-filled">
+      <div class="cf-slot">${filledSlot}</div>
+      <div class="cf-name">${fill.code}</div>
+      <div class="cf-venue">${fill.venue || ''}</div>
+    </div>`;
+  } else {
+    const parts = [cell.t, cell.l].filter(Boolean);
+    td.innerHTML = `<span class="cell-default">${parts.join(' / ')}</span>`;
+  }
+}
+
+function handleCellClick(td, cell) {
+  const theoryFill = cell.t ? getCourseForSlot(cell.t) : null;
+  const labFill = cell.l ? getCourseForSlot(cell.l) : null;
+  if (theoryFill || labFill) return; // let dblclick handle edit
+
+  // Determine which slot(s) to offer
+  const slots = [cell.t, cell.l].filter(Boolean);
+  if (slots.length === 0) return;
+
+  if (slots.length === 1) {
+    openAddModal(slots[0]);
+  } else {
+    // Both theory and lab available: ask user which
+    openAddModal(null, slots);
+  }
+}
+
+function handleCellDblClick(td, cell) {
+  const theoryFill = cell.t ? getCourseForSlot(cell.t) : null;
+  const labFill = cell.l ? getCourseForSlot(cell.l) : null;
+  const fill = theoryFill || labFill;
+  if (fill) openEditModal(fill);
+}
+
+/* ── Add Modal ── */
+let addSlot = '';
+function openAddModal(slot, choiceSlots) {
+  if (choiceSlots) {
+    // Show slot picker
+    const picker = document.createElement('div');
+    picker.style.cssText = 'display:flex;gap:10px;margin-bottom:14px;';
+    choiceSlots.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'pf-btn';
+      btn.textContent = s;
+      btn.onclick = () => { openAddModal(s); closeModal('modal-add-slot-pick'); };
+      picker.appendChild(btn);
+    });
+    // Just use first slot for now; in real use ask
+    openAddModal(choiceSlots[0]);
+    return;
+  }
+  addSlot = slot;
+  document.getElementById('modal-slot-tag').textContent = slot;
+  document.getElementById('modal-times').textContent = getSlotTimes(slot);
+  document.getElementById('m-code').value = '';
+  document.getElementById('m-title').value = '';
+  document.getElementById('m-faculty').value = '';
+  document.getElementById('m-venue').value = '';
+  document.getElementById('m-credits').value = '4';
+  openModal('modal-add');
+  setTimeout(() => document.getElementById('m-code').focus(), 100);
+}
+
+function getSlotTimes(slot) {
+  // Approximate slot time mapping
+  const map = {
+    A1:'8:00–8:50', B1:'8:55–9:45', C1:'9:50–10:40', D1:'10:45–11:35',
+    E1:'11:40–12:30', F1:'12:35–1:25', G1:'1:30–2:20', TB1:'9:50–10:40',
+    A2:'1:30–2:20', B2:'2:25–3:15', C2:'3:20–4:10', D2:'4:15–5:05',
+    F2:'2:25–3:15', E2:'4:15–5:05', G2:'3:20–4:10',
+  };
+  return map[slot] ? `Time: ${map[slot]}` : '';
+}
+
+document.getElementById('modal-add-save')?.addEventListener('click', () => {
+  const code = document.getElementById('m-code').value.trim().toUpperCase();
+  const title = document.getElementById('m-title').value.trim();
+  const faculty = document.getElementById('m-faculty').value.trim();
+  const venue = document.getElementById('m-venue').value.trim().toUpperCase();
+  const credits = parseInt(document.getElementById('m-credits').value) || 0;
+
+  if (!code || !title) { showToast('Course code and title are required.', 'error'); return; }
+  if (credits < 1 || credits > 10) { showToast('Credits must be between 1 and 10.', 'error'); return; }
+
+  // Conflict check
+  const conflict = courses.find(c => c.slots.includes(addSlot));
+  if (conflict) {
+    document.getElementById('conflict-msg').textContent = `Slot ${addSlot} is already used by ${conflict.code} — ${conflict.title}.`;
+    closeModal('modal-add');
+    openModal('modal-conflict');
+    return;
+  }
+
+  courses.push({ id: Date.now() + '', code, title, faculty, venue, credits, slots: [addSlot] });
+  saveCourses();
+  buildTimetable();
+  renderCourseList();
+  closeModal('modal-add');
+  showToast(`${code} added to slot ${addSlot}!`, 'success');
 });
 
-/* --- Luxury Cursor Logic --- */
-function initCursor() {
-    const cursor = document.getElementById("cursor");
-    const trail = document.getElementById("cursor-trail");
+document.getElementById('modal-add-close')?.addEventListener('click', () => closeModal('modal-add'));
+document.getElementById('modal-add-cancel')?.addEventListener('click', () => closeModal('modal-add'));
+document.getElementById('conflict-ok')?.addEventListener('click', () => closeModal('modal-conflict'));
 
-    document.addEventListener("mousemove", (e) => {
-        const x = e.clientX;
-        const y = e.clientY;
-        cursor.style.left = x + "px";
-        cursor.style.top = y + "px";
-        trail.style.left = x + "px";
-        trail.style.top = y + "px";
-    });
-
-    // Toggle active state classes based on interactive element proximity
-    document.addEventListener("mouseover", (e) => {
-        const isInteractive = e.target.closest("a, button, .hcard, .tool-card, .slot-cell, .pf-btn, .nptel-card, .opt-item, .week-block, input, select");
-        cursor.classList.toggle("cursor-active", !!isInteractive);
-        trail.classList.toggle("trail-active", !!isInteractive);
-    });
+/* ── Edit Modal ── */
+let editingCourseId = '';
+function openEditModal(course) {
+  editingCourseId = course.id;
+  document.getElementById('edit-slot-tag').textContent = course.slots.join(' + ');
+  document.getElementById('e-code').value = course.code;
+  document.getElementById('e-title').value = course.title;
+  document.getElementById('e-faculty').value = course.faculty;
+  document.getElementById('e-venue').value = course.venue;
+  document.getElementById('e-credits').value = course.credits;
+  openModal('modal-edit');
 }
 
-/* --- Section Switching Engine --- */
-function showSection(sectionId) {
-    document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
-    document.getElementById(`sec-${sectionId}`).classList.add("active");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+document.getElementById('modal-edit-save')?.addEventListener('click', () => {
+  const idx = courses.findIndex(c => c.id === editingCourseId);
+  if (idx === -1) return;
+  courses[idx].code = document.getElementById('e-code').value.trim().toUpperCase();
+  courses[idx].title = document.getElementById('e-title').value.trim();
+  courses[idx].faculty = document.getElementById('e-faculty').value.trim();
+  courses[idx].venue = document.getElementById('e-venue').value.trim().toUpperCase();
+  courses[idx].credits = parseInt(document.getElementById('e-credits').value) || courses[idx].credits;
+  saveCourses();
+  buildTimetable();
+  renderCourseList();
+  closeModal('modal-edit');
+  showToast('Course updated!', 'success');
+});
+
+document.getElementById('modal-edit-remove')?.addEventListener('click', () => {
+  courses = courses.filter(c => c.id !== editingCourseId);
+  saveCourses();
+  buildTimetable();
+  renderCourseList();
+  closeModal('modal-edit');
+  showToast('Course removed.', 'info');
+});
+
+document.getElementById('modal-edit-close')?.addEventListener('click', () => closeModal('modal-edit'));
+document.getElementById('modal-edit-cancel')?.addEventListener('click', () => closeModal('modal-edit'));
+
+/* ── Course List ── */
+function renderCourseList() {
+  const tbody = document.getElementById('cl-body');
+  const badge = document.getElementById('credit-badge');
+  const total = document.getElementById('cl-total');
+  if (!tbody) return;
+
+  const totalCredits = courses.reduce((s, c) => s + c.credits, 0);
+  if (badge) badge.textContent = totalCredits + ' Credits';
+  if (total) total.textContent = totalCredits;
+
+  if (courses.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="cl-empty">No courses yet. Click a timetable cell to add one.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = courses.map(c => `
+    <tr>
+      <td><strong>${c.slots.join(', ')}</strong></td>
+      <td>${c.code}</td>
+      <td>${c.title}</td>
+      <td>${c.faculty || '—'}</td>
+      <td>${c.venue || '—'}</td>
+      <td>${c.credits}</td>
+      <td><button class="cl-del" onclick="deleteCourse('${c.id}')"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>
+  `).join('');
 }
 
-/* ════════════════════════════════════════════════════════════
-   MODULE 01 ENGINE: AUTOMATED FFCS COUPLING
-   ════════════════════════════════════════════════════════════ */
-function initTimetableStructure() {
-    const table = document.getElementById("timetable");
-    table.innerHTML = "";
-
-    // Generate Double Headers
-    let h1 = `<tr class="h-theory"><th rowspan="2">Day</th>`;
-    THEORY_TIMES.forEach((time, index) => {
-        if(index === 6) h1 += `<th rowspan="2" class="lunch-col">LUNCH</th>`;
-        h1 += `<th>${time}</th>`;
-    });
-    h1 += `<th>V-Slots</th></tr>`;
-
-    let h2 = `<tr class="h-lab">`;
-    LAB_TIMES.forEach(lab => h2 += `<th>${lab}</th>`);
-    h2 += `</tr>`;
-
-    table.innerHTML = h1 + h2;
-
-    // Process Day Row Layouts
-    FFCS_MATRIX.forEach((dayRow, dayIndex) => {
-        let rowHtml = `<tr><td class="day-label">${DAYS[dayIndex]}</td>`;
-        dayRow.forEach(cell => {
-            if(cell === "LUNCH") {
-                rowHtml += `<td class="lunch-col"></td>`;
-            } else {
-                rowHtml += `<td class="slot-cell" data-t="${cell.t || ''}" data-l="${cell.l || ''}" onclick="handleCellClick(this)"></td>`;
-            }
-        });
-        table.innerHTML += rowHtml + "</tr>";
-    });
+function deleteCourse(id) {
+  courses = courses.filter(c => c.id !== id);
+  saveCourses();
+  buildTimetable();
+  renderCourseList();
+  showToast('Course removed.', 'info');
 }
 
-function renderTimetableData() {
-    document.querySelectorAll(".slot-cell").forEach(cell => {
-        const slotT = cell.getAttribute("data-t");
-        const slotL = cell.getAttribute("data-l");
-        
-        const matchingData = savedPlacements.find(item => 
-            (slotT && item.slot === slotT) || (slotL && item.slot === slotL)
-        );
+/* ── Reset ── */
+document.getElementById('btn-reset')?.addEventListener('click', () => openModal('modal-reset-confirm'));
+document.getElementById('reset-ok')?.addEventListener('click', () => {
+  courses = [];
+  saveCourses();
+  buildTimetable();
+  renderCourseList();
+  closeModal('modal-reset-confirm');
+  showToast('Timetable reset.', 'info');
+});
+document.getElementById('reset-cancel')?.addEventListener('click', () => closeModal('modal-reset-confirm'));
 
-        if(matchingData) {
-            cell.classList.add("cell-filled");
-            cell.innerHTML = `
-                <div class="cell-inner-box" ondblclick="event.stopPropagation(); triggerEditModal('${matchingData.slot}')">
-                    <span class="cell-code">${matchingData.code}</span>
-                    <span class="cell-venue">${matchingData.venue || ''}</span>
-                </div>
-            `;
-        } else {
-            cell.classList.remove("cell-filled");
-            cell.innerHTML = `
-                <div class="cell-inner-box">
-                    <span class="cell-slot-name">${slotT || slotL}</span>
-                </div>
-            `;
-        }
-    });
-    renderCourseRegistryTable();
+/* ── Download ── */
+document.getElementById('btn-download-tt')?.addEventListener('click', () => openModal('modal-dl'));
+document.getElementById('dl-cancel')?.addEventListener('click', () => closeModal('modal-dl'));
+document.getElementById('dl-print')?.addEventListener('click', () => { closeModal('modal-dl'); window.print(); });
+document.getElementById('dl-csv')?.addEventListener('click', () => {
+  if (courses.length === 0) { showToast('No courses to export.', 'error'); closeModal('modal-dl'); return; }
+  const rows = [['Slot','Code','Title','Faculty','Venue','Credits'],
+    ...courses.map(c => [c.slots.join('+'), c.code, c.title, c.faculty, c.venue, c.credits])];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ffcs_timetable.csv';
+  a.click();
+  closeModal('modal-dl');
+  showToast('CSV exported!', 'success');
+});
+
+/* ── Suggest Slots ── */
+const ALL_THEORY_SLOTS = ['A1','B1','C1','D1','E1','F1','G1','A2','B2','C2','D2','E2','F2','G2',
+  'TB1','TC1','TD1','TE1','TF1','TG1','TAI1','TAJ1','TAK1','TH1',
+  'TB2','TC2','TD2','TE2','TF2'];
+
+document.getElementById('btn-suggest-slots')?.addEventListener('click', () => {
+  const used = new Set(courses.flatMap(c => c.slots));
+  const free = ALL_THEORY_SLOTS.filter(s => !used.has(s));
+  const container = document.getElementById('suggested-slots-list');
+  container.innerHTML = free.length ? free.map(s => `<span class="sug-tag">${s}</span>`).join('') : '<span style="color:var(--muted);font-size:0.85rem;">All slots are taken!</span>';
+  openModal('modal-suggestions');
+});
+document.getElementById('modal-suggest-close')?.addEventListener('click', () => closeModal('modal-suggestions'));
+document.getElementById('suggest-ok')?.addEventListener('click', () => closeModal('modal-suggestions'));
+
+/* ── Quick View ── */
+document.getElementById('btn-quickvis')?.addEventListener('click', () => {
+  const list = courses.map(c => `${c.slots.join('+')} — ${c.code} (${c.title})`).join('\n') || 'No courses added yet.';
+  alert('Quick View — Your Courses:\n\n' + list);
+});
+
+/* ══════════════════════════════════════════════════════════
+   CGPA CALCULATOR
+   ══════════════════════════════════════════════════════════ */
+const VIT_GRADES = { S:10, 'A+':9, A:8, 'B+':7, B:6, C:5, F:0 };
+const GRADE_OPTIONS = Object.keys(VIT_GRADES).map(g => `<option value="${g}">${g} (${VIT_GRADES[g]})</option>`).join('');
+
+/* GPA Rows */
+let gpaRows = [];
+function addGPARow() {
+  const id = Date.now() + Math.random();
+  gpaRows.push(id);
+  const container = document.getElementById('gpa-courses');
+  const div = document.createElement('div');
+  div.className = 'gpa-row';
+  div.id = 'gpa-row-' + id;
+  div.innerHTML = `
+    <input placeholder="Course name" class="gpa-name" type="text"/>
+    <select class="gpa-grade">${GRADE_OPTIONS}</select>
+    <input placeholder="Credits" class="gpa-cr" type="number" min="1" max="10" value="4"/>
+    <button class="btn-row-del" onclick="removeGPARow(${id})"><i class="fa-solid fa-xmark"></i></button>
+  `;
+  container.appendChild(div);
 }
-
-function handleCellClick(element) {
-    if(element.classList.contains("cell-filled")) return;
-    const tSlot = element.getAttribute("data-t");
-    const lSlot = element.getAttribute("data-l");
-    
-    selectedTargetCell = tSlot || lSlot;
-    
-    document.getElementById("modal-slot-tag").innerText = (tSlot && lSlot) ? `${tSlot} / ${lSlot}` : selectedTargetCell;
-    document.getElementById("modal-times").innerText = "Assign course values to this structural block.";
-    
-    // Clear Input Parameters
-    document.getElementById("m-code").value = "";
-    document.getElementById("m-title").value = "";
-    document.getElementById("m-faculty").value = "";
-    document.getElementById("m-venue").value = "";
-    document.getElementById("m-credits").value = "3";
-
-    openCustomModal("modal-add");
+function removeGPARow(id) {
+  gpaRows = gpaRows.filter(r => r !== id);
+  document.getElementById('gpa-row-' + id)?.remove();
 }
-
-// Modal Interactivity Framework
-function openCustomModal(id) {
-    document.getElementById("overlay").classList.remove("hidden");
-    document.getElementById(id).classList.remove("hidden");
-}
-
-function closeActiveModals() {
-    document.getElementById("overlay").classList.add("hidden");
-    document.querySelectorAll(".modal").forEach(m => m.classList.add("hidden"));
-}
-
-function initModalClosers() {
-    document.getElementById("overlay").addEventListener("click", closeActiveModals);
-    document.getElementById("modal-add-close").addEventListener("click", closeActiveModals);
-    document.getElementById("modal-add-cancel").addEventListener("click", closeActiveModals);
-    document.getElementById("modal-edit-close").addEventListener("click", closeActiveModals);
-    document.getElementById("modal-edit-cancel").addEventListener("click", closeActiveModals);
-    document.getElementById("conflict-ok").addEventListener("click", closeActiveModals);
-    document.getElementById("reset-cancel").addEventListener("click", closeActiveModals);
-    document.getElementById("dl-cancel").addEventListener("click", closeActiveModals);
-
-    // Form Submissions
-    document.getElementById("modal-add-save").addEventListener("click", executeCourseSave);
-    document.getElementById("modal-edit-save").addEventListener("click", executeCourseUpdate);
-    document.getElementById("modal-edit-remove").addEventListener("click", executeCourseRemoval);
-    document.getElementById("btn-reset").addEventListener("click", () => openCustomModal("modal-reset-confirm"));
-    document.getElementById("reset-ok").addEventListener("click", purgeAllTimetableData);
-    document.getElementById("btn-download-tt").addEventListener("click", () => openCustomModal("modal-dl"));
-    document.getElementById("dl-print").addEventListener("click", () => { closeActiveModals(); window.print(); });
-    document.getElementById("dl-csv").addEventListener("click", exportDataCSV);
-    document.getElementById("pv-close").addEventListener("click", closeActiveModals);
-}
-
-function executeCourseSave() {
-    const code = document.getElementById("m-code").value.trim().toUpperCase();
-    const title = document.getElementById("m-title").value.trim();
-    const faculty = document.getElementById("m-faculty").value.trim();
-    const venue = document.getElementById("m-venue").value.trim().toUpperCase();
-    const credits = parseInt(document.getElementById("m-credits").value) || 0;
-
-    if(!code) { showSystemToast("Course Code is mandatory"); return; }
-
-    // Conflict Parsing Check
-    const exists = savedPlacements.some(c => c.slot === selectedTargetCell);
-    if(exists) {
-        closeActiveModals();
-        document.getElementById("conflict-msg").innerText = `Slot ${selectedTargetCell} produces an explicit overlap flag.`;
-        openCustomModal("modal-conflict");
-        return;
-    }
-
-    savedPlacements.push({ slot: selectedTargetCell, code, title, faculty, venue, credits });
-    syncFFCSState();
-    closeActiveModals();
-    showSystemToast(`Added operational code ${code}`);
-}
-
-let activeEditSlotKey = null;
-function triggerEditModal(slotKey) {
-    activeEditSlotKey = slotKey;
-    const target = savedPlacements.find(c => c.slot === slotKey);
-    if(!target) return;
-
-    document.getElementById("edit-slot-tag").innerText = slotKey;
-    document.getElementById("e-code").value = target.code;
-    document.getElementById("e-title").value = target.title || '';
-    document.getElementById("e-faculty").value = target.faculty || '';
-    document.getElementById("e-venue").value = target.venue || '';
-    document.getElementById("e-credits").value = target.credits || 0;
-
-    openCustomModal("modal-edit");
-}
-
-function executeCourseUpdate() {
-    const target = savedPlacements.find(c => c.slot === activeEditSlotKey);
-    if(target) {
-        target.code = document.getElementById("e-code").value.trim().toUpperCase();
-        target.title = document.getElementById("e-title").value.trim();
-        target.faculty = document.getElementById("e-faculty").value.trim();
-        target.venue = document.getElementById("e-venue").value.trim().toUpperCase();
-        target.credits = parseInt(document.getElementById("e-credits").value) || 0;
-        syncFFCSState();
-    }
-    closeActiveModals();
-}
-
-function executeCourseRemoval() {
-    savedPlacements = savedPlacements.filter(c => c.slot !== activeEditSlotKey);
-    syncFFCSState();
-    closeActiveModals();
-    showSystemToast("Slot reference scrubbed.");
-}
-
-function purgeAllTimetableData() {
-    savedPlacements = [];
-    syncFFCSState();
-    closeActiveModals();
-    showSystemToast("Timetable state cleared.");
-}
-
-function syncFFCSState() {
-    localStorage.setItem('eduhub_ffcs_slots', JSON.stringify(savedPlacements));
-    renderTimetableData();
-}
-
-function renderCourseRegistryTable() {
-    const tbody = document.getElementById("cl-body");
-    tbody.innerHTML = "";
-    let totalCredits = 0;
-
-    savedPlacements.forEach(c => {
-        totalCredits += c.credits;
-        tbody.innerHTML += `
-            <tr>
-                <td><strong>${c.slot}</strong></td>
-                <td>${c.code}</td>
-                <td>${c.title || '—'}</td>
-                <td>${c.faculty || '—'}</td>
-                <td>${c.venue || '—'}</td>
-                <td>${c.credits}</td>
-                <td><button class="cl-del-btn" onclick="triggerDirectRemoval('${c.slot}')"><i class="fa-solid fa-trash"></i></button></td>
-            </tr>
-        `;
-    });
-
-    document.getElementById("credit-badge").innerText = `${totalCredits} Credits`;
-    document.getElementById("cl-total").innerText = totalCredits;
-}
-
-function triggerDirectRemoval(slotKey) {
-    savedPlacements = savedPlacements.filter(c => c.slot !== slotKey);
-    syncFFCSState();
-}
-
-function exportDataCSV() {
-    if(savedPlacements.length === 0) { showSystemToast("No active courses inside registry."); return; }
-    let csvContent = "data:text/csv;charset=utf-8,Slot,Course Code,Title,Faculty,Venue,Credits\n";
-    savedPlacements.forEach(c => {
-        csvContent += `"${c.slot}","${c.code}","${c.title || ''}","${c.faculty || ''}","${c.venue || ''}",${c.credits}\n`;
-    });
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "vit_ffcs_timetable.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    closeActiveModals();
-}
-
-/* ════════════════════════════════════════════════════════════
-   MODULE 02 ENGINE: CONTINUOUS RECURSIVE GRADIENT MATH
-   ════════════════════════════════════════════════════════════ */
-const GRADE_POINTS = { "S": 10, "A+": 9, "A": 8, "B+": 7, "B": 6, "C": 5, "F": 0 };
-
-function initCgpaDefaultRows() {
-    const gpaBox = document.getElementById("gpa-courses");
-    gpaBox.innerHTML = "";
-    for(let i=0; i<5; i++) addGpaInputRow();
-
-    const cgpaBox = document.getElementById("cgpa-sems");
-    cgpaBox.innerHTML = "";
-    for(let i=0; i<3; i++) addCgpaInputRow();
-}
-
-// Attach listeners for structural runtime extensions
-document.getElementById("btn-add-gpa-course").addEventListener("click", addGpaInputRow);
-document.getElementById("btn-add-sem").addEventListener("click", addCgpaInputRow);
-
-function addGpaInputRow() {
-    const container = document.getElementById("gpa-courses");
-    const div = document.createElement("div");
-    div.className = "calc-row";
-    div.innerHTML = `
-        <input type="text" class="calc-input gpa-c-name" placeholder="Course Name/Code"/>
-        <input type="number" class="calc-input gpa-c-cr" placeholder="Credits" min="1" max="10"/>
-        <select class="calc-select gpa-c-gr">
-            <option value="">Grade</option>${Object.keys(GRADE_POINTS).map(g => `<option value="${g}">${g}</option>`).join('')}
-        </select>
-        <button class="btn-row-del" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
-    `;
-    container.appendChild(div);
-}
-
-function addCgpaInputRow() {
-    const container = document.getElementById("cgpa-sems");
-    const div = document.createElement("div");
-    div.className = "calc-row";
-    const nextSem = container.children.length + 1;
-    div.innerHTML = `
-        <input type="text" class="calc-input sem-name" value="Semester ${nextSem}"/>
-        <input type="number" class="calc-input sem-gpa" placeholder="GPA" step="0.01" min="0" max="10"/>
-        <input type="number" class="calc-input sem-cr" placeholder="Credits" min="1"/>
-        <button class="btn-row-del" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
-    `;
-    container.appendChild(div);
-}
-
 function calcGPA() {
-    const rows = document.querySelectorAll("#gpa-courses .calc-row");
-    let totalPoints = 0, totalCredits = 0;
-    
-    rows.forEach(row => {
-        const cr = parseFloat(row.querySelector(".gpa-c-cr").value);
-        const grade = row.querySelector(".gpa-c-gr").value;
-        if(!isNaN(cr) && grade in GRADE_POINTS) {
-            totalPoints += cr * GRADE_POINTS[grade];
-            totalCredits += cr;
-        }
-    });
-
-    if(totalCredits === 0) {
-        document.getElementById("gpa-result").innerText = "—";
-        document.getElementById("gpa-credits").innerText = "0";
-        document.getElementById("gpa-grade").innerText = "—";
-        return;
-    }
-
-    const gpa = totalPoints / totalCredits;
-    document.getElementById("gpa-result").innerText = gpa.toFixed(2);
-    document.getElementById("gpa-credits").innerText = totalCredits;
-    
-    // Abstracted evaluation boundary mappings
-    let primaryEst = "C";
-    if(gpa >= 9.0) primaryEst = "S";
-    else if(gpa >= 8.0) primaryEst = "A";
-    else if(gpa >= 7.0) primaryEst = "B+";
-    else if(gpa >= 6.0) primaryEst = "B";
-    
-    document.getElementById("gpa-grade").innerText = primaryEst;
+  let totalPoints = 0, totalCr = 0;
+  document.querySelectorAll('#gpa-courses .gpa-row').forEach(row => {
+    const grade = row.querySelector('.gpa-grade').value;
+    const cr = parseFloat(row.querySelector('.gpa-cr').value) || 0;
+    totalPoints += (VIT_GRADES[grade] || 0) * cr;
+    totalCr += cr;
+  });
+  if (totalCr === 0) { showToast('Add at least one course.', 'error'); return; }
+  const gpa = (totalPoints / totalCr).toFixed(2);
+  document.getElementById('gpa-result').textContent = gpa;
+  document.getElementById('gpa-credits').textContent = totalCr;
+  document.getElementById('gpa-grade').textContent = gpaClassify(parseFloat(gpa));
 }
+function gpaClassify(g) {
+  if (g >= 9.5) return 'S'; if (g >= 8.5) return 'A+'; if (g >= 7.5) return 'A';
+  if (g >= 6.5) return 'B+'; if (g >= 5.5) return 'B'; if (g >= 4.5) return 'C'; return 'F';
+}
+document.getElementById('btn-add-gpa-course')?.addEventListener('click', addGPARow);
 
+/* CGPA Rows */
+let semRows = [];
+function addSemRow() {
+  const id = Date.now() + Math.random();
+  semRows.push(id);
+  const container = document.getElementById('cgpa-sems');
+  const div = document.createElement('div');
+  div.className = 'sem-row';
+  div.id = 'sem-row-' + id;
+  div.innerHTML = `
+    <input placeholder="Semester" class="sem-name" type="text" value="Sem ${semRows.length}"/>
+    <input placeholder="GPA" class="sem-gpa" type="number" step="0.01" min="0" max="10"/>
+    <input placeholder="Credits" class="sem-cr" type="number" min="1" value="20"/>
+    <button class="btn-row-del" onclick="removeSemRow(${id})"><i class="fa-solid fa-xmark"></i></button>
+  `;
+  container.appendChild(div);
+}
+function removeSemRow(id) {
+  semRows = semRows.filter(r => r !== id);
+  document.getElementById('sem-row-' + id)?.remove();
+}
 function calcCGPA() {
-    const rows = document.querySelectorAll("#cgpa-sems .calc-row");
-    let cumulativeProduct = 0, totalCredits = 0;
-
-    rows.forEach(row => {
-        const gpa = parseFloat(row.querySelector(".sem-gpa").value);
-        const cr = parseFloat(row.querySelector(".sem-cr").value);
-        if(!isNaN(gpa) && !isNaN(cr)) {
-            cumulativeProduct += gpa * cr;
-            totalCredits += cr;
-        }
-    });
-
-    if(totalCredits === 0) {
-        document.getElementById("cgpa-result").innerText = "—";
-        document.getElementById("cgpa-total-cr").innerText = "0";
-        document.getElementById("cgpa-class").innerText = "—";
-        return;
-    }
-
-    const cgpa = cumulativeProduct / totalCredits;
-    document.getElementById("cgpa-result").innerText = cgpa.toFixed(2);
-    document.getElementById("cgpa-total-cr").innerText = totalCredits;
-
-    let classification = "Second Class";
-    if(cgpa >= 8.5) classification = "First Class (Honours)";
-    else if(cgpa >= 6.5) classification = "First Class";
-    
-    document.getElementById("cgpa-class").innerText = classification;
+  let totalPoints = 0, totalCr = 0;
+  document.querySelectorAll('#cgpa-sems .sem-row').forEach(row => {
+    const gpa = parseFloat(row.querySelector('.sem-gpa').value) || 0;
+    const cr = parseFloat(row.querySelector('.sem-cr').value) || 0;
+    totalPoints += gpa * cr;
+    totalCr += cr;
+  });
+  if (totalCr === 0) { showToast('Add at least one semester.', 'error'); return; }
+  const cgpa = (totalPoints / totalCr).toFixed(2);
+  document.getElementById('cgpa-result').textContent = cgpa;
+  document.getElementById('cgpa-total-cr').textContent = totalCr;
+  const g = parseFloat(cgpa);
+  let cls = g >= 9 ? 'First Class with Distinction (S)' : g >= 8 ? 'First Class (A)' : g >= 6 ? 'Second Class (B)' : 'Pass';
+  document.getElementById('cgpa-class').textContent = cls;
 }
+document.getElementById('btn-add-sem')?.addEventListener('click', addSemRow);
 
+/* Grade Predictor */
 function calcPredictor() {
-    const curCgpa = parseFloat(document.getElementById("pred-curr").value);
-    const completedCr = parseFloat(document.getElementById("pred-done-cr").value);
-    const targetCgpa = parseFloat(document.getElementById("pred-target").value);
-    const remainingCr = parseFloat(document.getElementById("pred-rem-cr").value);
-
-    const resultBox = document.getElementById("pred-result-box");
-    resultBox.classList.remove("hidden", "danger-state");
-
-    if(isNaN(curCgpa) || isNaN(completedCr) || isNaN(targetCgpa) || isNaN(remainingCr)) {
-        showSystemToast("Please compute complete predictive variables.");
-        return;
-    }
-
-    const totalCredits = completedCr + remainingCr;
-    const requiredTotalPoints = targetCgpa * totalCredits;
-    const currentEarnedPoints = curCgpa * completedCr;
-    const missingPoints = requiredTotalPoints - currentEarnedPoints;
-    const targetGpa = missingPoints / remainingCr;
-
-    const valDisplay = document.getElementById("pred-res-val");
-    const msgDisplay = document.getElementById("pred-res-msg");
-
-    if(targetGpa > 10.0) {
-        resultBox.classList.add("danger-state");
-        valDisplay.innerText = targetGpa.toFixed(2);
-        msgDisplay.innerText = "Mathematically impossible. Re-evaluate structural target settings.";
-    } else if(targetGpa < 0) {
-        valDisplay.innerText = "0.00";
-        msgDisplay.innerText = "Target exceeded based on your existing cumulative trajectory.";
-    } else {
-        valDisplay.innerText = targetGpa.toFixed(2);
-        msgDisplay.innerText = "Maintain this focus over remaining semester operations.";
-    }
+  const curr = parseFloat(document.getElementById('pred-curr').value);
+  const doneCr = parseFloat(document.getElementById('pred-done-cr').value);
+  const target = parseFloat(document.getElementById('pred-target').value);
+  const remCr = parseFloat(document.getElementById('pred-rem-cr').value);
+  if ([curr, doneCr, target, remCr].some(isNaN) || remCr <= 0) {
+    showToast('Please fill all fields correctly.', 'error'); return;
+  }
+  const needed = ((target * (doneCr + remCr)) - (curr * doneCr)) / remCr;
+  const box = document.getElementById('pred-result-box');
+  const val = document.getElementById('pred-res-val');
+  const msg = document.getElementById('pred-res-msg');
+  box.classList.remove('hidden');
+  if (needed > 10) {
+    val.textContent = 'N/A';
+    msg.textContent = 'Target is not achievable with current CGPA and credits.';
+  } else if (needed < 0) {
+    val.textContent = '—';
+    msg.textContent = 'You have already achieved your target CGPA! 🎉';
+  } else {
+    val.textContent = needed.toFixed(2);
+    msg.textContent = needed >= 9 ? 'Very challenging! You need near-perfect grades.' :
+      needed >= 7 ? 'Achievable with consistent effort.' : 'Well within reach. Keep it up!';
+  }
 }
 
-/* ════════════════════════════════════════════════════════════
-   MODULE 03 ENGINE: INTERACTIVE QUIZ METRICS (NPTEL)
-   ════════════════════════════════════════════════════════════ */
-function renderNptelGrid() {
-    const grid = document.getElementById("nptel-grid");
-    grid.innerHTML = "";
-    NPTEL_DATA.forEach(course => {
-        grid.innerHTML += `
-            <div class="nptel-card" onclick="openNptelQuiz(${course.id})">
-                <h4>${course.title}</h4>
-                <div class="nc-bottom">
-                    <span class="nc-weeks">${course.weeks} Weeks</span>
-                    <span>${course.questions} Questions</span>
-                </div>
-            </div>
-        `;
-    });
+/* ══════════════════════════════════════════════════════════
+   NPTEL PRACTICE
+   ══════════════════════════════════════════════════════════ */
+const NPTEL_COURSES = [
+  { id:'ds', name:'Data Science for Engineers', emoji:'📊', weeks:12, qs:480 },
+  { id:'dbms', name:'Database Management Systems', emoji:'🗄️', weeks:8, qs:320 },
+  { id:'cn', name:'Computer Networks', emoji:'🌐', weeks:10, qs:400 },
+  { id:'os', name:'Operating Systems', emoji:'💾', weeks:10, qs:400 },
+  { id:'dsa', name:'Data Structures & Algorithms', emoji:'🌳', weeks:12, qs:480 },
+  { id:'ml', name:'Machine Learning', emoji:'🤖', weeks:12, qs:480 },
+  { id:'dl', name:'Deep Learning', emoji:'🧠', weeks:8, qs:320 },
+  { id:'nlp', name:'Natural Language Processing', emoji:'💬', weeks:8, qs:320 },
+  { id:'cv', name:'Computer Vision', emoji:'👁️', weeks:8, qs:320 },
+  { id:'cloud', name:'Cloud Computing', emoji:'☁️', weeks:8, qs:320 },
+  { id:'cyber', name:'Cyber Security', emoji:'🔐', weeks:10, qs:400 },
+  { id:'ai', name:'Introduction to AI', emoji:'🤖', weeks:8, qs:320 },
+  { id:'iot', name:'Internet of Things', emoji:'📡', weeks:8, qs:320 },
+  { id:'bc', name:'Blockchain Technology', emoji:'⛓️', weeks:8, qs:320 },
+  { id:'python', name:'Programming in Python', emoji:'🐍', weeks:8, qs:320 },
+  { id:'java', name:'Programming in Java', emoji:'☕', weeks:8, qs:320 },
+  { id:'c', name:'Programming in C', emoji:'🖥️', weeks:8, qs:320 },
+  { id:'se', name:'Software Engineering', emoji:'🔧', weeks:8, qs:320 },
+  { id:'toc', name:'Theory of Computation', emoji:'∑', weeks:8, qs:320 },
+  { id:'cd', name:'Compiler Design', emoji:'⚙️', weeks:8, qs:320 },
+  { id:'coa', name:'Computer Organisation & Architecture', emoji:'🏗️', weeks:10, qs:400 },
+  { id:'dld', name:'Digital Logic Design', emoji:'🔌', weeks:8, qs:320 },
+  { id:'maths', name:'Discrete Mathematics', emoji:'📐', weeks:8, qs:320 },
+  { id:'prob', name:'Probability & Statistics', emoji:'📈', weeks:8, qs:320 },
+  { id:'la', name:'Linear Algebra', emoji:'🔢', weeks:6, qs:240 },
+];
+
+// Sample questions generator
+function genQuestions(courseId, week) {
+  return [
+    {
+      q: `Which of the following best describes the core concept studied in Week ${week} of ${courseId.toUpperCase()}?`,
+      options: ['Option A — Foundational principle', 'Option B — Advanced derivation', 'Option C — Applied technique', 'Option D — Historical context'],
+      ans: 0,
+    },
+    {
+      q: `A key algorithm discussed in this topic has a time complexity of:`,
+      options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
+      ans: 2,
+    },
+    {
+      q: `Which statement about this week's concept is TRUE?`,
+      options: ['It applies only to theoretical problems', 'It was developed in the 1990s', 'It is widely used in modern systems', 'It has no practical applications'],
+      ans: 2,
+    },
+  ];
+}
+
+let currentCourse = null;
+let quizMode = 'week';
+
+function renderNptelGrid(list) {
+  const grid = document.getElementById('nptel-grid');
+  if (!grid) return;
+  grid.innerHTML = list.map(c => `
+    <div class="nptel-card" onclick="openNptelCourse('${c.id}')">
+      <div class="nptel-card-emoji">${c.emoji}</div>
+      <div class="nptel-card-name">${c.name}</div>
+      <div class="nptel-card-meta">${c.weeks} weeks · ${c.qs}+ questions</div>
+    </div>
+  `).join('');
 }
 
 function filterNptel() {
-    const query = document.getElementById("nptel-search").value.toLowerCase();
-    const cards = document.querySelectorAll("#nptel-grid .nptel-card");
-    NPTEL_DATA.forEach((course, index) => {
-        const isMatch = course.title.toLowerCase().includes(query);
-        cards[index].style.display = isMatch ? "flex" : "none";
-    });
+  const q = document.getElementById('nptel-search').value.toLowerCase();
+  renderNptelGrid(NPTEL_COURSES.filter(c => c.name.toLowerCase().includes(q)));
 }
 
-function openNptelQuiz(courseId) {
-    currentQuizTarget = NPTEL_DATA.find(c => c.id === courseId);
-    document.getElementById("nptel-home").classList.add("hidden");
-    const quizView = document.getElementById("nptel-quiz-view");
-    quizView.classList.remove("hidden");
-    
-    document.getElementById("quiz-course-title").innerText = currentQuizTarget.title;
-    setQuizViewMode(currentQuizViewMode);
+function openNptelCourse(id) {
+  currentCourse = NPTEL_COURSES.find(c => c.id === id);
+  if (!currentCourse) return;
+  document.getElementById('nptel-home').classList.add('hidden');
+  document.getElementById('nptel-quiz-view').classList.remove('hidden');
+  document.getElementById('quiz-course-title').textContent = currentCourse.emoji + ' ' + currentCourse.name;
+  setQuizMode('week');
 }
 
 function closeNptelQuiz() {
-    document.getElementById("nptel-quiz-view").classList.add("hidden");
-    document.getElementById("nptel-home").classList.remove("hidden");
+  document.getElementById('nptel-home').classList.remove('hidden');
+  document.getElementById('nptel-quiz-view').classList.add('hidden');
+  currentCourse = null;
 }
 
 function setQuizMode(mode) {
-    currentQuizViewMode = mode;
-    document.querySelectorAll(".qmode-btn").forEach(btn => btn.classList.remove("active"));
-    if(mode === 'week') document.getElementById("qm-week").classList.add("active");
-    else document.getElementById("qm-full").classList.add("active");
-    setQuizViewMode(mode);
+  quizMode = mode;
+  document.getElementById('qm-week').classList.toggle('active', mode === 'week');
+  document.getElementById('qm-full').classList.toggle('active', mode === 'full');
+  renderQuiz();
 }
 
-function setQuizViewMode(mode) {
-    const body = document.getElementById("quiz-body");
-    body.innerHTML = "";
+function renderQuiz() {
+  const body = document.getElementById('quiz-body');
+  if (!currentCourse || !body) return;
 
-    if(mode === "week") {
-        for(let i = 1; i <= currentQuizTarget.weeks; i++) {
-            body.innerHTML += `
-                <div class="week-block" onclick="loadWeekQuestions(${i})">
-                    <div class="wb-left">
-                        <h4>Assignment Week 0${i}</h4>
-                        <p>Core algorithmic evaluation models and solutions</p>
-                    </div>
-                    <div class="wb-arrow"><i class="fa-solid fa-chevron-right"></i></div>
-                </div>
-            `;
-        }
-    } else {
-        loadComprehensiveQuiz();
+  const weeks = quizMode === 'week' ? currentCourse.weeks : 1;
+  const allQ = quizMode === 'full'
+    ? Array.from({length: currentCourse.weeks}, (_,w) => genQuestions(currentCourse.id, w+1)).flat().slice(0, 20)
+    : null;
+
+  body.innerHTML = '';
+
+  if (quizMode === 'week') {
+    for (let w = 1; w <= currentCourse.weeks; w++) {
+      const section = document.createElement('div');
+      section.className = 'quiz-week-section';
+      section.innerHTML = `<div class="quiz-week-label">Week ${w}</div>`;
+      genQuestions(currentCourse.id, w).forEach((q, qi) => {
+        section.appendChild(buildQuestionEl(q, `${currentCourse.id}-w${w}-q${qi}`));
+      });
+      body.appendChild(section);
     }
+  } else {
+    allQ.forEach((q, qi) => body.appendChild(buildQuestionEl(q, `${currentCourse.id}-full-q${qi}`)));
+  }
+
+  document.getElementById('quiz-ext-link').innerHTML =
+    `<i class="fa-solid fa-circle-info"></i> Questions are representative samples. For official NPTEL content visit <a href="https://swayam.gov.in" target="_blank">swayam.gov.in</a>.`;
 }
 
-function loadWeekQuestions(weekNum) {
-    const body = document.getElementById("quiz-body");
-    body.innerHTML = `<button class="back-btn" style="margin-bottom:20px" onclick="setQuizViewMode('week')"><i class="fa-solid fa-arrow-left"></i> Back to Weeks</button>`;
-    
-    // Render standard deterministic synthetic tracking loops
-    for(let i=1; i<=5; i++) {
-        body.appendChild(buildQuestionElement(i, weekNum));
-    }
+function buildQuestionEl(q, key) {
+  const div = document.createElement('div');
+  div.className = 'quiz-q';
+  div.innerHTML = `<div class="quiz-q-text">${q.q}</div><div class="quiz-options"></div>`;
+  const opts = div.querySelector('.quiz-options');
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-opt';
+    btn.innerHTML = `<span class="quiz-opt-letter">${letters[i]}</span> ${opt}`;
+    btn.onclick = () => {
+      opts.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('correct','wrong'));
+      if (i === q.ans) {
+        btn.classList.add('correct');
+        showToast('Correct! ✅', 'success');
+      } else {
+        btn.classList.add('wrong');
+        opts.children[q.ans].classList.add('correct');
+        showToast('Incorrect. Try again!', 'error');
+      }
+    };
+    opts.appendChild(btn);
+  });
+  return div;
 }
 
-function loadComprehensiveQuiz() {
-    const body = document.getElementById("quiz-body");
-    for(let i=1; i<=10; i++) {
-        body.appendChild(buildQuestionElement(i, "Global"));
-    }
-}
+/* ══════════════════════════════════════════════════════════
+   PYQ PAPERS
+   ══════════════════════════════════════════════════════════ */
+const PYQ_SUBJECTS = [
+  'Mathematics-I','Mathematics-II','Engineering Physics','Engineering Chemistry',
+  'Problem Solving and OOP','Data Structures & Algorithms','Database Management Systems',
+  'Operating Systems','Computer Networks','Software Engineering','Computer Organisation',
+  'Theory of Computation','Compiler Design','Digital Logic Design','Discrete Mathematics',
+  'Machine Learning','Artificial Intelligence','Computer Vision','Natural Language Processing',
+  'Cloud Computing','Cyber Security','IoT','Blockchain','Engineering Mechanics','Thermodynamics',
+];
+const EXAM_TYPES = ['CAT1','CAT2','FAT'];
+const YEARS = [2021, 2022, 2023, 2024];
 
-function buildQuestionElement(index, context) {
-    const div = document.createElement("div");
-    div.className = "q-box";
-    div.innerHTML = `
-        <div class="q-text">Q${index}. [${context} Matrix Variable] Which of the following functional options is structurally valid for this computing framework?</div>
-        <div class="opt-list">
-            <div class="opt-item" onclick="evaluateOption(this, true)">Structural Option A (Optimized configuration execution parameter)</div>
-            <div class="opt-item" onclick="evaluateOption(this, false)">Structural Option B (Fallback execution dependency layer)</div>
-            <div class="opt-item" onclick="evaluateOption(this, false)">Structural Option C (De-allocated memory space trace block)</div>
-            <div class="opt-item" onclick="evaluateOption(this, false)">Structural Option D (Asynchronous termination sequence handle)</div>
-        </div>
-    `;
-    return div;
-}
-
-function evaluateOption(element, isCorrect) {
-    const list = element.parentElement;
-    // Lock additional choice execution arrays
-    if(list.querySelector(".correct-state") || list.querySelector(".wrong-state")) return;
-
-    if(isCorrect) {
-        element.classList.add("correct-state");
-    } else {
-        element.classList.add("wrong-state");
-        // Locate true configuration state mapping target references
-        const items = list.querySelectorAll(".opt-item");
-        items[0].classList.add("correct-state"); 
-    }
-    
-    const explain = document.createElement("div");
-    explain.className = "q-explain-panel";
-    explain.innerHTML = `<strong>Explanation:</strong> Option A defines the highly optimized standard path confirmed under standard institutional test vectors.`;
-    list.parentElement.appendChild(explain);
-}
-
-/* ════════════════════════════════════════════════════════════
-   MODULE 04 ENGINE: HISTORICAL ARCHIVE DATA REPO (PYQ)
-   ════════════════════════════════════════════════════════════ */
-let selectedExamTypeFilter = "all";
-let selectedYearFilter = "all";
-
-function setupPyqFilters() {
-    document.querySelectorAll("#pf-type .pf-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            document.querySelectorAll("#pf-type .pf-btn").forEach(b => b.classList.remove("active"));
-            e.target.classList.add("active");
-            selectedExamTypeFilter = e.target.getAttribute("data-val");
-            renderPyqGrid();
-        });
+// Generate a fixed fake list of PYQ papers
+const PYQ_PAPERS = [];
+let _pid = 1;
+YEARS.forEach(yr => {
+  EXAM_TYPES.forEach(et => {
+    PYQ_SUBJECTS.forEach((sub, si) => {
+      PYQ_PAPERS.push({
+        id: _pid++,
+        subject: sub,
+        code: `CSE${1001 + si}`,
+        type: et,
+        year: yr,
+      });
     });
+  });
+});
 
-    document.querySelectorAll("#pf-year .pf-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            document.querySelectorAll("#pf-year .pf-btn").forEach(b => b.classList.remove("active"));
-            e.target.classList.add("active");
-            selectedYearFilter = e.target.getAttribute("data-val");
-            renderPyqGrid();
-        });
-    });
-}
-
-function renderPyqGrid() {
-    const grid = document.getElementById("pyq-grid");
-    grid.innerHTML = "";
-    const searchVal = document.getElementById("pyq-search").value.toLowerCase();
-
-    PYQ_DATA.forEach(paper => {
-        const matchesType = (selectedExamTypeFilter === "all" || paper.type === selectedExamTypeFilter);
-        const matchesYear = (selectedYearFilter === "all" || paper.year.toString() === selectedYearFilter);
-        const matchesSearch = (paper.code.toLowerCase().includes(searchVal) || paper.name.toLowerCase().includes(searchVal));
-
-        if(matchesType && matchesYear && matchesSearch) {
-            grid.innerHTML += `
-                <div class="pyq-card">
-                    <div>
-                        <div class="pyq-c-code">${paper.code}</div>
-                        <h4>${paper.name}</h4>
-                        <div class="pyq-meta-row">
-                            <span class="p-meta m-type">${paper.type}</span>
-                            <span class="p-meta">${paper.year}</span>
-                            <span class="p-meta">Slot: ${paper.slot}</span>
-                        </div>
-                    </div>
-                    <button onclick="openPaperViewer('${paper.code}', '${paper.type}', '${paper.year}')" class="pyq-dl-btn">
-                        <i class="fa-solid fa-cloud-arrow-down"></i> View Document
-                    </button>
-                </div>
-            `;
-        }
-    });
-
-    if(grid.innerHTML === "") {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:40px;">No exact paper matches found within localized index sets.</div>`;
-    }
-}
-
-function openPaperViewer(code, type, year) {
-    const viewer = document.getElementById("modal-paper-viewer");
-    if(viewer) {
-        document.getElementById("pv-title").innerText = `${code} - ${type} (${year})`;
-        document.getElementById("pv-subtitle").innerText = "Internal Secure Document Stream • VIT Vellore";
-        
-        // Dynamic content generation based on course code to simulate "extraction"
-        const docSim = document.querySelector(".pv-doc-sim");
-        let questionsHtml = `<h2>${code} QUESTION PAPER - ${type}</h2>`;
-        
-        let questions = [];
-        
-        // Robust Subject-Specific Question Repository
-        if (code.startsWith("CSE")) {
-            questions = [
-                { q: "Analyze architectural differences between Von Neumann and Harvard architectures in high-performance computing.", m: 5 },
-                { q: "Explain the concept of cache coherence using the MESI protocol in multiprocessor systems.", m: 5 },
-                { q: "Implement memory management using segmentation and paging. Discuss the impact on fragmentation.", m: 10 },
-                { q: "Explain synchronization primitives in distributed systems. Describe Lamport’s logical clock mechanism.", m: 10 },
-                { q: "Design a finite state machine (FSM) that accepts strings containing an even number of 1s.", m: 10 },
-                { q: "Compare RISC and CISC architectures regarding instruction set complexity and execution cycles.", m: 10 },
-                { q: "Describe pipeline hazards (Structural, Data, Control) and suggest hardware/software mitigation strategies.", m: 15 },
-                { q: "Analyze the performance metrics of different disk scheduling algorithms (SSTF, SCAN, C-LOOK).", m: 15 }
-            ];
-        } else if (code.startsWith("MAT")) {
-            questions = [
-                { q: "Solve the second-order non-homogeneous differential equation using the method of undetermined coefficients.", m: 5 },
-                { q: "Evaluate the double integral of f(x,y) over the specified region in polar coordinates.", m: 5 },
-                { q: "Prove the uniqueness of the solution for a given Initial Value Problem (IVP) using Picard's Iteration.", m: 10 },
-                { q: "Calculate Eigenvalues and Eigenvectors for the provided 3x3 matrix and verify diagonalization properties.", m: 10 },
-                { q: "Verify Green's theorem for the given vector field over a closed region C in the XY plane.", m: 10 },
-                { q: "Find the Fourier series expansion for the periodic function f(x) = x in the interval (-π, π).", m: 10 },
-                { q: "Apply the Newton-Raphson method to find the roots of f(x) = x^3 - x - 1 correct to three decimals.", m: 15 },
-                { q: "Solve the system of linear equations using the Gauss-Seidel iterative method for four iterations.", m: 15 }
-            ];
-        } else if (code.startsWith("ECE") || code.startsWith("EEE")) {
-            questions = [
-                { q: "Determine the Thevenin and Norton equivalent circuits for the given complex bridge network.", m: 5 },
-                { q: "Explain the operation and transfer characteristics of a Schmitt trigger using an Operational Amplifier.", m: 5 },
-                { q: "Design a synchronous MOD-12 counter using JK flip-flops and provide the state transition table.", m: 10 },
-                { q: "Calculate the output voltage and voltage gain for a multi-stage BJT common-emitter amplifier.", m: 10 },
-                { q: "Compare AM, FM, and PM modulation techniques in terms of bandwidth efficiency and noise immunity.", m: 10 },
-                { q: "Analyze the frequency response and roll-off rate of a second-order Butterworth low-pass filter.", m: 10 },
-                { q: "Describe the internal architecture, register set, and interrupt structure of the 8051 microcontroller.", m: 15 },
-                { q: "Implement a 3-variable logic function using a 4:1 Multiplexer and explain the mapping process.", m: 15 }
-            ];
-        } else if (code.startsWith("PHY")) {
-            questions = [
-                { q: "Derive Maxwell's equations in differential form and explain the significance of Displacement Current.", m: 5 },
-                { q: "Explain the principle of Laser action and the necessity of Population Inversion for light amplification.", m: 5 },
-                { q: "Solve the Schrodinger wave equation for a particle trapped in a 1D infinite potential well.", m: 10 },
-                { q: "Discuss the Meissner effect and distinguish between Type-I and Type-II superconductors.", m: 10 },
-                { q: "Analyze the interference pattern produced by Newton's rings and calculate the radius of curvature.", m: 10 },
-                { q: "Explain the Hall effect and how it determines charge carrier concentration and mobility.", m: 10 },
-                { q: "Describe the Kronig-Penney model and the formation of energy bands in crystalline solids.", m: 15 },
-                { q: "Calculate the numerical aperture, acceptance angle, and V-number for a step-index optical fiber.", m: 15 }
-            ];
-        } else if (code.startsWith("CHY")) {
-            questions = [
-                { q: "Explain Molecular Orbital Theory (MOT) for the O2 and N2 molecules. Determine bond order.", m: 5 },
-                { q: "Discuss the electrochemical mechanism of corrosion and the application of sacrificial anode protection.", m: 5 },
-                { q: "Derive the Clausius-Clapeyron equation and discuss its significance in phase transitions.", m: 10 },
-                { q: "Analyze the mechanisms of Addition vs. Condensation polymerization with suitable chemical examples.", m: 10 },
-                { q: "Describe the working principle of UV-Visible spectroscopy and verify the Beer-Lambert law.", m: 10 },
-                { q: "Explain industrial water treatment processes including Reverse Osmosis and Ion Exchange resin method.", m: 10 },
-                { q: "Compare the chemistry and efficiency of Lithium-ion batteries vs. traditional Lead-acid cells.", m: 15 },
-                { q: "Discuss the phase diagram of a two-component lead-silver system and define the eutectic point.", m: 15 }
-            ];
-        } else if (code.startsWith("STS")) {
-            questions = [
-                { q: "Solve the syllogism: All engineers are logical; Some logical people are artists. Conclude the relationship.", m: 5 },
-                { q: "A train crosses a 300m platform in 20s. Find the speed of the train if its length is 100m.", m: 5 },
-                { q: "Find the missing number in the sequence: 5, 11, 23, 47, 95, ____.", m: 10 },
-                { q: "Decode the logic: If 'COMPUTER' is written as 'RFUVQNPC', how is 'ENGINEER' coded?", m: 10 },
-                { q: "Calculate the probability of getting exactly two heads when tossing three unbiased coins simultaneously.", m: 10 },
-                { q: "Identify logical fallacies in the provided corporate statement regarding market expansion.", m: 10 },
-                { q: "Solve the Work-Time problem: A takes 10 days, B takes 15 days. How long if they work together?", m: 15 },
-                { q: "Interpret the data trend in the provided bar chart representing export-import growth over five years.", m: 15 }
-            ];
-        } else {
-            questions = [
-                { q: "Summarize the core ethical implications of AI development in modern engineering society.", m: 5 },
-                { q: "Define the SWOT analysis framework and apply it to a hypothetical tech startup case study.", m: 5 },
-                { q: "Discuss the barriers to effective communication in multicultural and global team environments.", m: 10 },
-                { q: "Analyze the impact of globalization on local supply chain and logistics management strategies.", m: 10 },
-                { q: "Compare democratic and autocratic leadership styles and their impact on long-term project performance.", m: 10 },
-                { q: "Describe the various stages of the project lifecycle from initiation and planning to closure.", m: 10 },
-                { q: "Develop a detailed project timeline using PERT/CPM for a lean startup scenario.", m: 15 },
-                { q: "Analyze the '4Ps' of the marketing mix for a newly launched educational technology product.", m: 15 }
-            ];
-        }
-
-        questions.forEach((item, index) => {
-            questionsHtml += `
-                <div class="q-line">
-                    <span class="q-num">${index + 1}.</span>
-                    <div>${item.q} [${item.m} Marks]</div>
-                </div>
-            `;
-        });
-
-        docSim.innerHTML = questionsHtml;
-
-        openCustomModal("modal-paper-viewer");
-        showSystemToast(`Loading ${code} internal archive...`);
-    }
-}
+let pyqFilterType = 'all', pyqFilterYear = 'all', pyqSearch = '';
 
 function filterPYQ() {
-    renderPyqGrid();
+  pyqSearch = document.getElementById('pyq-search').value.toLowerCase();
+  renderPYQ();
 }
 
-/* ════════════════════════════════════════════════════════════
-   GLOBAL SYSTEM UTILITIES
-   ════════════════════════════════════════════════════════════ */
-function showSystemToast(message) {
-    const toast = document.getElementById("toast");
-    document.getElementById("toast-msg").innerText = message;
-    toast.classList.remove("hidden");
-    setTimeout(() => {
-        toast.classList.add("hidden");
-    }, 2500);
+function renderPYQ() {
+  const grid = document.getElementById('pyq-grid');
+  if (!grid) return;
+  let list = PYQ_PAPERS;
+  if (pyqFilterType !== 'all') list = list.filter(p => p.type === pyqFilterType);
+  if (pyqFilterYear !== 'all') list = list.filter(p => p.year === parseInt(pyqFilterYear));
+  if (pyqSearch) list = list.filter(p => p.subject.toLowerCase().includes(pyqSearch) || p.code.toLowerCase().includes(pyqSearch));
+
+  const shown = list.slice(0, 60); // cap at 60 for perf
+  grid.innerHTML = shown.map(p => `
+    <div class="pyq-card" onclick="openPaperLink('${p.code}','${p.subject}','${p.type}','${p.year}')">
+      <div class="pyq-card-top">
+        <span class="pyq-badge-type ${p.type.toLowerCase()}">${p.type}</span>
+        <span class="pyq-year">${p.year}</span>
+      </div>
+      <div class="pyq-card-title">${p.subject}</div>
+      <div class="pyq-card-code">${p.code}</div>
+      <div class="pyq-card-footer">
+        <span class="pyq-view-btn"><i class="fa-solid fa-file-pdf"></i> View Paper</span>
+        <span style="font-size:0.75rem;color:var(--muted)">PDF</span>
+      </div>
+    </div>
+  `).join('');
+
+  if (shown.length === 0) grid.innerHTML = '<p style="color:var(--muted);padding:40px;text-align:center;">No papers found for selected filters.</p>';
 }
+
+function openPaperLink(code, subject, type, year) {
+  // Redirect to CodeChef VIT papers (open source VIT paper archive)
+  const url = `https://www.papers.codechefvit.com/`;
+  window.open(url, '_blank', 'noopener');
+  showToast(`Opening ${subject} ${type} ${year}...`, 'info');
+}
+
+// PYQ filter buttons
+document.getElementById('pf-type')?.addEventListener('click', e => {
+  const btn = e.target.closest('.pf-btn');
+  if (!btn) return;
+  document.querySelectorAll('#pf-type .pf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  pyqFilterType = btn.dataset.val;
+  renderPYQ();
+});
+document.getElementById('pf-year')?.addEventListener('click', e => {
+  const btn = e.target.closest('.pf-btn');
+  if (!btn) return;
+  document.querySelectorAll('#pf-year .pf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  pyqFilterYear = btn.dataset.val;
+  renderPYQ();
+});
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  buildTimetable();
+  renderCourseList();
+  renderNptelGrid(NPTEL_COURSES);
+  renderPYQ();
+
+  // Add initial GPA and CGPA rows
+  addGPARow(); addGPARow();
+  addSemRow(); addSemRow();
+});
