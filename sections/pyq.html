@@ -1,0 +1,48 @@
+<section class="section" id="sec-pyq">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge pyq-badge">04</span>
+      <h2>PYQ Papers</h2>
+    </div>
+  </div>
+
+  <div class="pyq-stats-row">
+    <div class="nstat"><span class="nstat-n">1500+</span><span class="nstat-l">Papers</span></div>
+    <div class="nstat"><span class="nstat-n">3</span><span class="nstat-l">Exam Types</span></div>
+    <div class="nstat"><span class="nstat-n">Free</span><span class="nstat-l">No Login</span></div>
+    <div class="nstat"><span class="nstat-n">PDF</span><span class="nstat-l">Download</span></div>
+  </div>
+
+  <div class="pyq-filters">
+    <div class="pf-group">
+      <label>Exam Type</label>
+      <div class="pf-btns" id="pf-type">
+        <button class="pf-btn active" data-val="all">All</button>
+        <button class="pf-btn" data-val="CAT1">CAT 1</button>
+        <button class="pf-btn" data-val="CAT2">CAT 2</button>
+        <button class="pf-btn" data-val="FAT">FAT</button>
+      </div>
+    </div>
+    <div class="pf-group">
+      <label>Year</label>
+      <div class="pf-btns" id="pf-year">
+        <button class="pf-btn active" data-val="all">All</button>
+        <button class="pf-btn" data-val="2024">2024</button>
+        <button class="pf-btn" data-val="2023">2023</button>
+        <button class="pf-btn" data-val="2022">2022</button>
+        <button class="pf-btn" data-val="2021">2021</button>
+      </div>
+    </div>
+    <div class="pf-search">
+      <input type="text" id="pyq-search" placeholder="Search by subject or code..." oninput="filterPYQ()"/>
+    </div>
+  </div>
+
+  <div class="pyq-grid" id="pyq-grid"></div>
+  <div class="pyq-source-note">
+    <i class="fa-solid fa-circle-info"></i>
+    Papers sourced from <strong>papers.codechefvit.com</strong> — Built by students for students.
+    <a href="https://www.papers.codechefvit.com/" target="_blank" rel="noopener">Visit original site <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+  </div>
+</section>

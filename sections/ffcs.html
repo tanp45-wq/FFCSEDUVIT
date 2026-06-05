@@ -1,0 +1,40 @@
+<section class="section" id="sec-ffcs">
+  <div class="tool-header">
+    <button class="back-btn" onclick="showSection('home')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+    <div class="tool-title-row">
+      <span class="tool-badge ffcs-badge">01</span>
+      <h2>FFCS Planner <span class="campus-chip">Vellore Campus</span></h2>
+    </div>
+    <div class="tool-actions">
+      <button class="tact-btn" id="btn-suggest-slots"><i class="fa-solid fa-wand-magic-sparkles"></i> Suggest Slots</button>
+      <button class="tact-btn" id="btn-quickvis"><i class="fa-regular fa-eye"></i> Quick View</button>
+      <button class="tact-btn tact-green" id="btn-download-tt"><i class="fa-solid fa-download"></i> Download</button>
+      <button class="tact-btn tact-red" id="btn-reset"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+    </div>
+  </div>
+
+  <div class="ffcs-hint"><i class="fa-solid fa-hand-pointer"></i> Click any cell to add a course · Double-click a filled cell to edit</div>
+
+  <div class="timetable-wrap">
+    <div class="timetable-scroll"><table id="timetable" class="timetable"></table></div>
+    <div class="tt-legend">
+      <span><span class="ld theory"></span> Theory hours</span>
+      <span><span class="ld lab"></span> Lab hours</span>
+      <span><span class="ld filled"></span> Course added</span>
+    </div>
+  </div>
+
+  <div class="course-list-wrap">
+    <div class="cl-header">
+      <h3>Selected Courses</h3>
+      <span class="credit-badge" id="credit-badge">0 Credits</span>
+    </div>
+    <div class="cl-scroll">
+      <table class="cl-table">
+        <thead><tr><th>Slot</th><th>Code</th><th>Title</th><th>Faculty</th><th>Venue</th><th>Credits</th><th></th></tr></thead>
+        <tbody id="cl-body"></tbody>
+        <tfoot><tr><td colspan="7" class="cl-total">Total Credits: <strong id="cl-total">0</strong></td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+</section>
