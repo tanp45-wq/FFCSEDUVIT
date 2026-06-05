@@ -1,766 +1,581 @@
-/* =========================================================
-   EduHub VIT — app.js  (Clean, fully working)
-   ========================================================= */
-
+/* ═══════════════════════════════════════════════════════
+   EduHub VIT — app.js   (Clean, fully working)
+═══════════════════════════════════════════════════════ */
 'use strict';
 
-/* ══════════════════════════════════════════════════════════
-   CURSOR
-   ══════════════════════════════════════════════════════════ */
-const cursor = document.getElementById('cursor');
-const cursorTrail = document.getElementById('cursor-trail');
-let mx = 0, my = 0, tx = 0, ty = 0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-(function animCursor() {
-  tx += (mx - tx) * 0.18;
-  ty += (my - ty) * 0.18;
-  if (cursor) { cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; }
-  if (cursorTrail) { cursorTrail.style.left = tx + 'px'; cursorTrail.style.top = ty + 'px'; }
-  requestAnimationFrame(animCursor);
-})();
+/* ══ CURSOR ══ */
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0; // Mouse coordinates
+let rx = 0, ry = 0; // Ring coordinates
 
-/* ══════════════════════════════════════════════════════════
-   SECTION NAVIGATION
-   ══════════════════════════════════════════════════════════ */
-const SECTION_MAP = { home: 'sec-home', ffcs: 'sec-ffcs', cgpa: 'sec-cgpa', nptel: 'sec-nptel', pyq: 'sec-pyq' };
+document.addEventListener('mousemove', e => {
+  mx = e.clientX;
+  my = e.clientY;
+  dot.style.left = mx + 'px';
+  dot.style.top  = my + 'px';
+});
 
-function showSection(key) {
-  Object.values(SECTION_MAP).forEach(id => {
+function animate() {
+  // Interpolation for smooth trailing effect
+  rx += (mx - rx) * 0.15;
+  ry += (my - ry) * 0.15;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animate);
+}
+animate();
+
+document.querySelectorAll('button,a,.tool-card,.hcard,.nptel-card,.pyq-card,.q-opt,.fb,.qm,.act-btn,.back-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('cursor-expand'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-expand'));
+});
+
+/* ══ SECTION NAV ══ */
+const SEC = { home:'sec-home', ffcs:'sec-ffcs', cgpa:'sec-cgpa', nptel:'sec-nptel', pyq:'sec-pyq' };
+function showSection(k) {
+  Object.values(SEC).forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
-  const target = document.getElementById(SECTION_MAP[key]);
-  if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+  const t = document.getElementById(SEC[k]);
+  if (t) { t.classList.add('active'); window.scrollTo(0, 0); }
 }
 
-/* ══════════════════════════════════════════════════════════
-   TOAST
-   ══════════════════════════════════════════════════════════ */
-let toastTimer = null;
-function showToast(msg, type = 'info') {
-  const toast = document.getElementById('toast');
-  const span = document.getElementById('toast-msg');
-  if (!toast || !span) return;
-  span.textContent = msg;
-  toast.style.borderLeft = type === 'success' ? '3px solid #34d399' : type === 'error' ? '3px solid #f87171' : '3px solid #a78bfa';
-  toast.classList.remove('hidden');
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 350); }, 3500);
+/* ══ TOAST ══ */
+let _toastT;
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  const ic = document.getElementById('toast-icon');
+  const sp = document.getElementById('toast-msg');
+  sp.textContent = msg;
+  ic.style.color = type==='success' ? 'var(--accent3)' : type==='error' ? 'var(--red)' : 'var(--accent)';
+  ic.className = type==='success' ? 'fa-solid fa-circle-check' : type==='error' ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-circle-info';
+  el.classList.remove('hidden'); el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => { el.classList.remove('show'); setTimeout(()=>el.classList.add('hidden'),350); }, 3200);
 }
 
-/* ══════════════════════════════════════════════════════════
-   OVERLAY / MODAL HELPERS
-   ══════════════════════════════════════════════════════════ */
+/* ══ BACKDROP + MODALS ══ */
 function openModal(id) {
-  const overlay = document.getElementById('overlay');
-  const modal = document.getElementById(id);
-  if (overlay) overlay.classList.remove('hidden');
-  if (modal) modal.classList.remove('hidden');
+  document.getElementById('backdrop')?.classList.remove('hidden');
+  document.getElementById(id)?.classList.remove('hidden');
 }
 function closeModal(id) {
-  const overlay = document.getElementById('overlay');
-  const modal = document.getElementById(id);
-  if (overlay) overlay.classList.add('hidden');
-  if (modal) modal.classList.add('hidden');
+  document.getElementById('backdrop')?.classList.add('hidden');
+  document.getElementById(id)?.classList.add('hidden');
 }
-function closeAllModals() {
+function closeAll() {
   document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-  const overlay = document.getElementById('overlay');
-  if (overlay) overlay.classList.add('hidden');
+  document.getElementById('backdrop')?.classList.add('hidden');
 }
-document.getElementById('overlay')?.addEventListener('click', closeAllModals);
+document.getElementById('backdrop')?.addEventListener('click', closeAll);
 
-/* ══════════════════════════════════════════════════════════
-   FFCS — VIT TIMETABLE DATA
-   ══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   FFCS TIMETABLE
+══════════════════════════════════════════════════════ */
+// Theory time header labels (12 col + lunch divider at index 2 and 7)
+const TH_THEORY = ['8:00','8:55','LUNCH','9:50','10:45','11:40','12:35','LUNCH','1:30','2:25','3:20','4:15'];
+const TH_LAB    = ['8:00','','','9:55','','11:30','','','13:30','','15:05',''];
 
-// Each row: [DAY_LABEL, ...cells]
-// Each cell: { t: theorySlot, l: labSlot } or { t } or { l } or null (lunch)
-const TT_THEORY_HEADERS = ['8:00–8:50','8:55–9:45','LUNCH','9:50–10:40','10:45–11:35','11:40–12:30','12:35–1:25','LUNCH','1:30–2:20','2:25–3:15','3:20–4:10','4:15–5:05'];
-const TT_LAB_HEADERS    = ['8:00–9:30','','LUNCH','9:55–11:25','','11:30–13:00','','LUNCH','13:30–15:00','','15:05–16:35',''];
-
-// Timetable cell definitions [theory_slot, lab_slot] (null = lunch divider)
-const TT_ROWS = [
-  { day:'MON', cells:[{t:'A1',l:'L1'},{t:'F1',l:'L2'},null,{t:'D1',l:'L3'},{t:'TB1',l:'L4'},{t:'TG1',l:'L5'},null,null,{t:'A2',l:'L31'},{t:'F2',l:'L32'},{t:'D2',l:'L33'},{t:'TB2',l:'L34'}] },
-  { day:'TUE', cells:[{t:'B1',l:'L7'},{t:'G1',l:'L8'},null,{t:'E1',l:'L9'},{t:'TC1',l:'L10'},{t:'TAI1',l:'L11'},null,null,{t:'B2',l:'L37'},{t:'G2',l:'L38'},{t:'E2',l:'L39'},{t:'TC2',l:'L40'}] },
-  { day:'WED', cells:[{t:'C1',l:'L13'},{t:'A1',l:'L14'},null,{t:'F1',l:'L15'},{t:'TD1',l:'L16'},{t:'TH1',l:'L17'},null,null,{t:'C2',l:'L43'},{t:'A2',l:'L44'},{t:'F2',l:'L45'},{t:'TD2',l:'L46'}] },
-  { day:'THU', cells:[{t:'D1',l:'L19'},{t:'B1',l:'L20'},null,{t:'G1',l:'L21'},{t:'TE1',l:'L22'},{t:'TAJ1',l:'L23'},null,null,{t:'D2',l:'L49'},{t:'B2',l:'L50'},{t:'G2',l:'L51'},{t:'TE2',l:'L52'}] },
-  { day:'FRI', cells:[{t:'E1',l:'L25'},{t:'C1',l:'L26'},null,{t:'A1',l:'L27'},{t:'TF1',l:'L28'},{t:'TAK1',l:'L29'},null,null,{t:'E2',l:'L55'},{t:'C2',l:'L56'},{t:'A2',l:'L57'},{t:'TF2',l:'L58'}] },
-  { day:'SAT', cells:[{t:'F1',l:null},{t:'D1',l:null},null,{t:'B1',l:null},{t:'G1',l:null},{t:'A1',l:null},null,null,{t:'F2',l:null},{t:'D2',l:null},{t:'B2',l:null},{t:'G2',l:null}] },
+// Each row: day label + 12 cell defs (null = lunch column)
+// Cell: { t:'THEORY_SLOT', l:'LAB_SLOT' }  — either/both can be absent
+const TT = [
+  { d:'MON', c:[{t:'A1',l:'L1'},{t:'F1',l:'L2'},null,{t:'D1',l:'L3'},{t:'TB1',l:'L4'},{t:'TG1',l:'L5'},null,null,{t:'A2',l:'L31'},{t:'F2',l:'L32'},{t:'D2',l:'L33'},{t:'TB2',l:'L34'}] },
+  { d:'TUE', c:[{t:'B1',l:'L7'},{t:'G1',l:'L8'},null,{t:'E1',l:'L9'},{t:'TC1',l:'L10'},{t:'TAI1',l:'L11'},null,null,{t:'B2',l:'L37'},{t:'G2',l:'L38'},{t:'E2',l:'L39'},{t:'TC2',l:'L40'}] },
+  { d:'WED', c:[{t:'C1',l:'L13'},{t:'A1',l:'L14'},null,{t:'F1',l:'L15'},{t:'TD1',l:'L16'},{t:'TH1',l:'L17'},null,null,{t:'C2',l:'L43'},{t:'A2',l:'L44'},{t:'F2',l:'L45'},{t:'TD2',l:'L46'}] },
+  { d:'THU', c:[{t:'D1',l:'L19'},{t:'B1',l:'L20'},null,{t:'G1',l:'L21'},{t:'TE1',l:'L22'},{t:'TAJ1',l:'L23'},null,null,{t:'D2',l:'L49'},{t:'B2',l:'L50'},{t:'G2',l:'L51'},{t:'TE2',l:'L52'}] },
+  { d:'FRI', c:[{t:'E1',l:'L25'},{t:'C1',l:'L26'},null,{t:'A1',l:'L27'},{t:'TF1',l:'L28'},{t:'TAK1',l:'L29'},null,null,{t:'E2',l:'L55'},{t:'C2',l:'L56'},{t:'A2',l:'L57'},{t:'TF2',l:'L58'}] },
+  { d:'SAT', c:[{t:'F1'},{t:'D1'},null,{t:'B1'},{t:'G1'},{t:'A1'},null,null,{t:'F2'},{t:'D2'},{t:'B2'},{t:'G2'}] },
 ];
 
-let courses = loadCourses();
+let courses = (() => { try { return JSON.parse(localStorage.getItem('ehvit_courses')||'[]'); } catch { return []; } })();
 
-function loadCourses() {
-  try { return JSON.parse(localStorage.getItem('eduhub_vit_courses') || '[]'); } catch { return []; }
+const slotMap = {};  // slot => course
+function rebuildSlotMap() {
+  Object.keys(slotMap).forEach(k => delete slotMap[k]);
+  courses.forEach(c => c.slots.forEach(s => slotMap[s] = c));
 }
-function saveCourses() {
-  localStorage.setItem('eduhub_vit_courses', JSON.stringify(courses));
-}
-function getCourseForSlot(slot) {
-  return courses.find(c => c.slots.includes(slot)) || null;
-}
+rebuildSlotMap();
 
-/* ── Build Timetable ── */
+function saveC() { localStorage.setItem('ehvit_courses', JSON.stringify(courses)); rebuildSlotMap(); }
+
 function buildTimetable() {
-  const table = document.getElementById('timetable');
-  if (!table) return;
-  table.innerHTML = '';
+  const tbl = document.getElementById('timetable');
+  if (!tbl) return;
+  tbl.innerHTML = '';
 
-  // Theory header
-  const thead1 = table.createTHead();
-  const theoryRow = thead1.insertRow();
-  theoryRow.className = 'theory-head';
-  const dayTh1 = document.createElement('th');
-  dayTh1.textContent = 'Day';
-  dayTh1.rowSpan = 2;
-  dayTh1.style.background = 'var(--surface2)';
-  theoryRow.appendChild(dayTh1);
-  TT_THEORY_HEADERS.forEach((h, i) => {
+  // Theory header row
+  const thead = tbl.createTHead();
+  const tr1 = thead.insertRow(); tr1.className = 'th-theory';
+  const dayTh = document.createElement('th');
+  dayTh.textContent = 'Day'; dayTh.rowSpan = 2;
+  dayTh.style.cssText = 'background:var(--bg3);color:var(--muted2);font-family:var(--fh);font-weight:700;font-size:.65rem;width:70px';
+  tr1.appendChild(dayTh);
+  TH_THEORY.forEach(h => {
     const th = document.createElement('th');
-    if (h === 'LUNCH') { th.textContent = 'LUNCH'; th.className = 'td-lunch'; th.rowSpan = 2; }
-    else { th.textContent = h; }
-    theoryRow.appendChild(th);
+    if (h === 'LUNCH') { th.textContent = 'L'; th.className = 'td-lunch'; th.rowSpan = 2; }
+    else th.textContent = h;
+    tr1.appendChild(th);
   });
 
-  // Lab header — skip lunch columns (already rowspan 2)
-  const labRow = thead1.insertRow();
-  labRow.className = 'lab-head';
-  TT_LAB_HEADERS.forEach((h, i) => {
-    if (TT_THEORY_HEADERS[i] === 'LUNCH') return; // rowspan already
-    const th = document.createElement('th');
-    th.textContent = h;
-    labRow.appendChild(th);
+  // Lab header row
+  const tr2 = thead.insertRow(); tr2.className = 'th-lab';
+  TH_LAB.forEach((h, i) => {
+    if (TH_THEORY[i] === 'LUNCH') return;
+    const th = document.createElement('th'); th.textContent = h;
+    tr2.appendChild(th);
   });
 
-  // Body
-  const tbody = table.createTBody();
-  TT_ROWS.forEach(rowDef => {
+  const tbody = tbl.createTBody();
+  TT.forEach(row => {
     const tr = tbody.insertRow();
-    const dayCell = tr.insertCell();
-    dayCell.textContent = rowDef.day;
-    dayCell.className = 'td-day';
-
-    rowDef.cells.forEach((cell, ci) => {
+    const dc = tr.insertCell(); dc.textContent = row.d; dc.className = 'td-day';
+    row.c.forEach(cell => {
       const td = tr.insertCell();
-      if (cell === null) {
-        td.className = 'td-lunch';
-        td.textContent = '';
-        return;
-      }
+      if (cell === null) { td.className = 'td-lunch'; return; }
       td.className = 'td-cell';
       renderCell(td, cell);
-      td.addEventListener('click', () => handleCellClick(td, cell));
-      td.addEventListener('dblclick', () => handleCellDblClick(td, cell));
+      td.addEventListener('click',   () => onCellClick(td, cell));
+      td.addEventListener('dblclick', () => onCellDbl(td, cell));
     });
   });
 }
 
 function renderCell(td, cell) {
-  // Check if theory slot is filled
-  const theoryFill = cell.t ? getCourseForSlot(cell.t) : null;
-  const labFill = cell.l ? getCourseForSlot(cell.l) : null;
-  const fill = theoryFill || labFill;
-
+  const fill = (cell.t && slotMap[cell.t]) || (cell.l && slotMap[cell.l]);
   if (fill) {
-    const filledSlot = theoryFill ? cell.t : cell.l;
-    td.innerHTML = `<div class="cell-filled">
-      <div class="cf-slot">${filledSlot}</div>
-      <div class="cf-name">${fill.code}</div>
-      <div class="cf-venue">${fill.venue || ''}</div>
-    </div>`;
+    const s = (cell.t && slotMap[cell.t]) ? cell.t : cell.l;
+    td.innerHTML = `<div class="cell-filled"><div class="cf-slot">${s}</div><div class="cf-name">${fill.code}</div><div class="cf-venue">${fill.venue||''}</div></div>`;
   } else {
     const parts = [cell.t, cell.l].filter(Boolean);
     td.innerHTML = `<span class="cell-default">${parts.join(' / ')}</span>`;
   }
 }
 
-function handleCellClick(td, cell) {
-  const theoryFill = cell.t ? getCourseForSlot(cell.t) : null;
-  const labFill = cell.l ? getCourseForSlot(cell.l) : null;
-  if (theoryFill || labFill) return; // let dblclick handle edit
-
-  // Determine which slot(s) to offer
-  const slots = [cell.t, cell.l].filter(Boolean);
-  if (slots.length === 0) return;
-
-  if (slots.length === 1) {
-    openAddModal(slots[0]);
-  } else {
-    // Both theory and lab available: ask user which
-    openAddModal(null, slots);
-  }
+function onCellClick(td, cell) {
+  const fill = (cell.t && slotMap[cell.t]) || (cell.l && slotMap[cell.l]);
+  if (fill) return;
+  // prefer theory slot; if only lab, use lab
+  const slot = cell.t || cell.l;
+  openAddModal(slot);
 }
 
-function handleCellDblClick(td, cell) {
-  const theoryFill = cell.t ? getCourseForSlot(cell.t) : null;
-  const labFill = cell.l ? getCourseForSlot(cell.l) : null;
-  const fill = theoryFill || labFill;
+function onCellDbl(td, cell) {
+  const fill = (cell.t && slotMap[cell.t]) || (cell.l && slotMap[cell.l]);
   if (fill) openEditModal(fill);
 }
 
-/* ── Add Modal ── */
-let addSlot = '';
-function openAddModal(slot, choiceSlots) {
-  if (choiceSlots) {
-    // Show slot picker
-    const picker = document.createElement('div');
-    picker.style.cssText = 'display:flex;gap:10px;margin-bottom:14px;';
-    choiceSlots.forEach(s => {
-      const btn = document.createElement('button');
-      btn.className = 'pf-btn';
-      btn.textContent = s;
-      btn.onclick = () => { openAddModal(s); closeModal('modal-add-slot-pick'); };
-      picker.appendChild(btn);
-    });
-    // Just use first slot for now; in real use ask
-    openAddModal(choiceSlots[0]);
-    return;
-  }
-  addSlot = slot;
-  document.getElementById('modal-slot-tag').textContent = slot;
-  document.getElementById('modal-times').textContent = getSlotTimes(slot);
-  document.getElementById('m-code').value = '';
-  document.getElementById('m-title').value = '';
-  document.getElementById('m-faculty').value = '';
-  document.getElementById('m-venue').value = '';
-  document.getElementById('m-credits').value = '4';
+/* ── ADD MODAL ── */
+let _addSlot = '';
+function openAddModal(slot) {
+  _addSlot = slot;
+  document.getElementById('madd-slot').textContent = slot;
+  document.getElementById('madd-time').textContent = '';
+  ['m-code','m-title','m-faculty','m-venue'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('m-credits').value = 4;
   openModal('modal-add');
-  setTimeout(() => document.getElementById('m-code').focus(), 100);
+  setTimeout(() => document.getElementById('m-code').focus(), 80);
 }
-
-function getSlotTimes(slot) {
-  // Approximate slot time mapping
-  const map = {
-    A1:'8:00–8:50', B1:'8:55–9:45', C1:'9:50–10:40', D1:'10:45–11:35',
-    E1:'11:40–12:30', F1:'12:35–1:25', G1:'1:30–2:20', TB1:'9:50–10:40',
-    A2:'1:30–2:20', B2:'2:25–3:15', C2:'3:20–4:10', D2:'4:15–5:05',
-    F2:'2:25–3:15', E2:'4:15–5:05', G2:'3:20–4:10',
-  };
-  return map[slot] ? `Time: ${map[slot]}` : '';
-}
-
-document.getElementById('modal-add-save')?.addEventListener('click', () => {
-  const code = document.getElementById('m-code').value.trim().toUpperCase();
-  const title = document.getElementById('m-title').value.trim();
+document.getElementById('madd-save')?.addEventListener('click', () => {
+  const code    = document.getElementById('m-code').value.trim().toUpperCase();
+  const title   = document.getElementById('m-title').value.trim();
   const faculty = document.getElementById('m-faculty').value.trim();
-  const venue = document.getElementById('m-venue').value.trim().toUpperCase();
+  const venue   = document.getElementById('m-venue').value.trim().toUpperCase();
   const credits = parseInt(document.getElementById('m-credits').value) || 0;
-
-  if (!code || !title) { showToast('Course code and title are required.', 'error'); return; }
-  if (credits < 1 || credits > 10) { showToast('Credits must be between 1 and 10.', 'error'); return; }
-
-  // Conflict check
-  const conflict = courses.find(c => c.slots.includes(addSlot));
-  if (conflict) {
-    document.getElementById('conflict-msg').textContent = `Slot ${addSlot} is already used by ${conflict.code} — ${conflict.title}.`;
-    closeModal('modal-add');
-    openModal('modal-conflict');
-    return;
+  if (!code || !title) { toast('Course code and title are required.', 'error'); return; }
+  if (credits < 1 || credits > 10) { toast('Credits must be 1–10.', 'error'); return; }
+  if (slotMap[_addSlot]) {
+    const cx = slotMap[_addSlot];
+    document.getElementById('conflict-msg').textContent = `Slot ${_addSlot} is already assigned to ${cx.code} — ${cx.title}.`;
+    closeModal('modal-add'); openModal('modal-conflict'); return;
   }
-
-  courses.push({ id: Date.now() + '', code, title, faculty, venue, credits, slots: [addSlot] });
-  saveCourses();
-  buildTimetable();
-  renderCourseList();
+  courses.push({ id: Date.now()+'', code, title, faculty, venue, credits, slots: [_addSlot] });
+  saveC(); buildTimetable(); renderList();
   closeModal('modal-add');
-  showToast(`${code} added to slot ${addSlot}!`, 'success');
+  toast(`${code} added to ${_addSlot}!`, 'success');
 });
-
-document.getElementById('modal-add-close')?.addEventListener('click', () => closeModal('modal-add'));
-document.getElementById('modal-add-cancel')?.addEventListener('click', () => closeModal('modal-add'));
+document.getElementById('madd-close')?.addEventListener('click',  () => closeModal('modal-add'));
+document.getElementById('madd-cancel')?.addEventListener('click', () => closeModal('modal-add'));
 document.getElementById('conflict-ok')?.addEventListener('click', () => closeModal('modal-conflict'));
 
-/* ── Edit Modal ── */
-let editingCourseId = '';
-function openEditModal(course) {
-  editingCourseId = course.id;
-  document.getElementById('edit-slot-tag').textContent = course.slots.join(' + ');
-  document.getElementById('e-code').value = course.code;
-  document.getElementById('e-title').value = course.title;
-  document.getElementById('e-faculty').value = course.faculty;
-  document.getElementById('e-venue').value = course.venue;
-  document.getElementById('e-credits').value = course.credits;
+/* ── EDIT MODAL ── */
+let _editId = '';
+function openEditModal(c) {
+  _editId = c.id;
+  document.getElementById('medit-slot').textContent = c.slots.join(' + ');
+  document.getElementById('e-code').value    = c.code;
+  document.getElementById('e-title').value   = c.title;
+  document.getElementById('e-faculty').value = c.faculty;
+  document.getElementById('e-venue').value   = c.venue;
+  document.getElementById('e-credits').value = c.credits;
   openModal('modal-edit');
 }
-
-document.getElementById('modal-edit-save')?.addEventListener('click', () => {
-  const idx = courses.findIndex(c => c.id === editingCourseId);
-  if (idx === -1) return;
-  courses[idx].code = document.getElementById('e-code').value.trim().toUpperCase();
-  courses[idx].title = document.getElementById('e-title').value.trim();
+document.getElementById('medit-save')?.addEventListener('click', () => {
+  const idx = courses.findIndex(c => c.id === _editId);
+  if (idx < 0) return;
+  courses[idx].code    = document.getElementById('e-code').value.trim().toUpperCase();
+  courses[idx].title   = document.getElementById('e-title').value.trim();
   courses[idx].faculty = document.getElementById('e-faculty').value.trim();
-  courses[idx].venue = document.getElementById('e-venue').value.trim().toUpperCase();
+  courses[idx].venue   = document.getElementById('e-venue').value.trim().toUpperCase();
   courses[idx].credits = parseInt(document.getElementById('e-credits').value) || courses[idx].credits;
-  saveCourses();
-  buildTimetable();
-  renderCourseList();
-  closeModal('modal-edit');
-  showToast('Course updated!', 'success');
+  saveC(); buildTimetable(); renderList();
+  closeModal('modal-edit'); toast('Course updated!', 'success');
 });
-
-document.getElementById('modal-edit-remove')?.addEventListener('click', () => {
-  courses = courses.filter(c => c.id !== editingCourseId);
-  saveCourses();
-  buildTimetable();
-  renderCourseList();
-  closeModal('modal-edit');
-  showToast('Course removed.', 'info');
+document.getElementById('medit-remove')?.addEventListener('click', () => {
+  courses = courses.filter(c => c.id !== _editId);
+  saveC(); buildTimetable(); renderList();
+  closeModal('modal-edit'); toast('Course removed.', 'info');
 });
+document.getElementById('medit-close')?.addEventListener('click',  () => closeModal('modal-edit'));
+document.getElementById('medit-cancel')?.addEventListener('click', () => closeModal('modal-edit'));
 
-document.getElementById('modal-edit-close')?.addEventListener('click', () => closeModal('modal-edit'));
-document.getElementById('modal-edit-cancel')?.addEventListener('click', () => closeModal('modal-edit'));
-
-/* ── Course List ── */
-function renderCourseList() {
+/* ── COURSE LIST ── */
+function renderList() {
   const tbody = document.getElementById('cl-body');
   const badge = document.getElementById('credit-badge');
   const total = document.getElementById('cl-total');
   if (!tbody) return;
-
-  const totalCredits = courses.reduce((s, c) => s + c.credits, 0);
-  if (badge) badge.textContent = totalCredits + ' Credits';
-  if (total) total.textContent = totalCredits;
-
-  if (courses.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="cl-empty">No courses yet. Click a timetable cell to add one.</td></tr>`;
+  const cr = courses.reduce((s,c) => s + c.credits, 0);
+  if (badge) badge.textContent = cr + ' Credits';
+  if (total) total.textContent = cr;
+  if (!courses.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="cl-empty">No courses yet — click a timetable cell to add one.</td></tr>`;
     return;
   }
-  tbody.innerHTML = courses.map(c => `
-    <tr>
-      <td><strong>${c.slots.join(', ')}</strong></td>
-      <td>${c.code}</td>
-      <td>${c.title}</td>
-      <td>${c.faculty || '—'}</td>
-      <td>${c.venue || '—'}</td>
-      <td>${c.credits}</td>
-      <td><button class="cl-del" onclick="deleteCourse('${c.id}')"><i class="fa-solid fa-trash"></i></button></td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = courses.map(c => `<tr>
+    <td><strong>${c.slots.join(', ')}</strong></td>
+    <td>${c.code}</td><td>${c.title}</td>
+    <td>${c.faculty||'—'}</td><td>${c.venue||'—'}</td><td>${c.credits}</td>
+    <td><button class="btn-del" onclick="delCourse('${c.id}')"><i class="fa-solid fa-trash"></i></button></td>
+  </tr>`).join('');
 }
-
-function deleteCourse(id) {
+window.delCourse = id => {
   courses = courses.filter(c => c.id !== id);
-  saveCourses();
-  buildTimetable();
-  renderCourseList();
-  showToast('Course removed.', 'info');
-}
+  saveC(); buildTimetable(); renderList(); toast('Removed.', 'info');
+};
 
-/* ── Reset ── */
-document.getElementById('btn-reset')?.addEventListener('click', () => openModal('modal-reset-confirm'));
-document.getElementById('reset-ok')?.addEventListener('click', () => {
-  courses = [];
-  saveCourses();
-  buildTimetable();
-  renderCourseList();
-  closeModal('modal-reset-confirm');
-  showToast('Timetable reset.', 'info');
+/* ── RESET ── */
+document.getElementById('btn-reset')?.addEventListener('click', () => openModal('modal-reset'));
+document.getElementById('reset-yes')?.addEventListener('click', () => {
+  courses = []; saveC(); buildTimetable(); renderList();
+  closeModal('modal-reset'); toast('Timetable reset.', 'info');
 });
-document.getElementById('reset-cancel')?.addEventListener('click', () => closeModal('modal-reset-confirm'));
+document.getElementById('reset-no')?.addEventListener('click', () => closeModal('modal-reset'));
 
-/* ── Download ── */
-document.getElementById('btn-download-tt')?.addEventListener('click', () => openModal('modal-dl'));
+/* ── EXPORT ── */
+document.getElementById('btn-dl')?.addEventListener('click', () => openModal('modal-dl'));
 document.getElementById('dl-cancel')?.addEventListener('click', () => closeModal('modal-dl'));
-document.getElementById('dl-print')?.addEventListener('click', () => { closeModal('modal-dl'); window.print(); });
+document.getElementById('dl-pdf')?.addEventListener('click', () => { closeModal('modal-dl'); window.print(); });
 document.getElementById('dl-csv')?.addEventListener('click', () => {
-  if (courses.length === 0) { showToast('No courses to export.', 'error'); closeModal('modal-dl'); return; }
+  if (!courses.length) { toast('No courses to export.', 'error'); closeModal('modal-dl'); return; }
   const rows = [['Slot','Code','Title','Faculty','Venue','Credits'],
-    ...courses.map(c => [c.slots.join('+'), c.code, c.title, c.faculty, c.venue, c.credits])];
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+    ...courses.map(c => [c.slots.join('+'),c.code,c.title,c.faculty,c.venue,c.credits])];
+  const csv = rows.map(r => r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'ffcs_timetable.csv';
-  a.click();
-  closeModal('modal-dl');
-  showToast('CSV exported!', 'success');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'ffcs_timetable.csv'; a.click();
+  closeModal('modal-dl'); toast('CSV exported!', 'success');
 });
 
-/* ── Suggest Slots ── */
-const ALL_THEORY_SLOTS = ['A1','B1','C1','D1','E1','F1','G1','A2','B2','C2','D2','E2','F2','G2',
-  'TB1','TC1','TD1','TE1','TF1','TG1','TAI1','TAJ1','TAK1','TH1',
-  'TB2','TC2','TD2','TE2','TF2'];
+/* ── SUGGEST FREE SLOTS ── */
+const ALL_SLOTS = ['A1','B1','C1','D1','E1','F1','G1','A2','B2','C2','D2','E2','F2','G2',
+  'TB1','TC1','TD1','TE1','TF1','TG1','TAI1','TAJ1','TAK1','TH1','TB2','TC2','TD2','TE2','TF2',
+  'L1','L2','L3','L4','L5','L7','L8','L9','L10','L11','L13','L14','L15','L16','L17',
+  'L19','L20','L21','L22','L23','L25','L26','L27','L28','L29','L31','L32','L33','L34',
+  'L37','L38','L39','L40','L43','L44','L45','L46','L49','L50','L51','L52','L55','L56','L57','L58'];
 
-document.getElementById('btn-suggest-slots')?.addEventListener('click', () => {
+document.getElementById('btn-suggest')?.addEventListener('click', () => {
   const used = new Set(courses.flatMap(c => c.slots));
-  const free = ALL_THEORY_SLOTS.filter(s => !used.has(s));
-  const container = document.getElementById('suggested-slots-list');
-  container.innerHTML = free.length ? free.map(s => `<span class="sug-tag">${s}</span>`).join('') : '<span style="color:var(--muted);font-size:0.85rem;">All slots are taken!</span>';
-  openModal('modal-suggestions');
+  const free = ALL_SLOTS.filter(s => !used.has(s));
+  const cont = document.getElementById('slot-tags');
+  cont.innerHTML = free.length
+    ? free.map(s => `<span class="slot-tag">${s}</span>`).join('')
+    : '<span style="color:var(--muted);font-size:.83rem">All slots are taken!</span>';
+  openModal('modal-slots');
 });
-document.getElementById('modal-suggest-close')?.addEventListener('click', () => closeModal('modal-suggestions'));
-document.getElementById('suggest-ok')?.addEventListener('click', () => closeModal('modal-suggestions'));
+document.getElementById('mslots-close')?.addEventListener('click', () => closeModal('modal-slots'));
+document.getElementById('mslots-ok')?.addEventListener('click',    () => closeModal('modal-slots'));
 
-/* ── Quick View ── */
-document.getElementById('btn-quickvis')?.addEventListener('click', () => {
-  const list = courses.map(c => `${c.slots.join('+')} — ${c.code} (${c.title})`).join('\n') || 'No courses added yet.';
-  alert('Quick View — Your Courses:\n\n' + list);
-});
+/* ══════════════════════════════════════════════════════
+   CGPA
+══════════════════════════════════════════════════════ */
+const VG = {S:10,'A+':9,A:8,'B+':7,B:6,C:5,F:0};
+const GRADE_OPTS = Object.keys(VG).map(g=>`<option value="${g}">${g} (${VG[g]})</option>`).join('');
+let gpaIds = [], semIds = [];
 
-/* ══════════════════════════════════════════════════════════
-   CGPA CALCULATOR
-   ══════════════════════════════════════════════════════════ */
-const VIT_GRADES = { S:10, 'A+':9, A:8, 'B+':7, B:6, C:5, F:0 };
-const GRADE_OPTIONS = Object.keys(VIT_GRADES).map(g => `<option value="${g}">${g} (${VIT_GRADES[g]})</option>`).join('');
-
-/* GPA Rows */
-let gpaRows = [];
 function addGPARow() {
   const id = Date.now() + Math.random();
-  gpaRows.push(id);
-  const container = document.getElementById('gpa-courses');
+  gpaIds.push(id);
+  const n = gpaIds.length;
   const div = document.createElement('div');
-  div.className = 'gpa-row';
-  div.id = 'gpa-row-' + id;
-  div.innerHTML = `
-    <input placeholder="Course name" class="gpa-name" type="text"/>
-    <select class="gpa-grade">${GRADE_OPTIONS}</select>
-    <input placeholder="Credits" class="gpa-cr" type="number" min="1" max="10" value="4"/>
-    <button class="btn-row-del" onclick="removeGPARow(${id})"><i class="fa-solid fa-xmark"></i></button>
-  `;
-  container.appendChild(div);
+  div.className = 'gpa-row'; div.id = 'gr' + id;
+  div.innerHTML = `<input type="text" placeholder="Course ${n}"/>
+    <select>${GRADE_OPTS}</select>
+    <input type="number" min="1" max="10" value="4" placeholder="Cr"/>
+    <button class="btn-row-del" onclick="rmGPA(${id})"><i class="fa-solid fa-xmark"></i></button>`;
+  document.getElementById('gpa-rows')?.appendChild(div);
 }
-function removeGPARow(id) {
-  gpaRows = gpaRows.filter(r => r !== id);
-  document.getElementById('gpa-row-' + id)?.remove();
-}
-function calcGPA() {
-  let totalPoints = 0, totalCr = 0;
-  document.querySelectorAll('#gpa-courses .gpa-row').forEach(row => {
-    const grade = row.querySelector('.gpa-grade').value;
-    const cr = parseFloat(row.querySelector('.gpa-cr').value) || 0;
-    totalPoints += (VIT_GRADES[grade] || 0) * cr;
-    totalCr += cr;
-  });
-  if (totalCr === 0) { showToast('Add at least one course.', 'error'); return; }
-  const gpa = (totalPoints / totalCr).toFixed(2);
-  document.getElementById('gpa-result').textContent = gpa;
-  document.getElementById('gpa-credits').textContent = totalCr;
-  document.getElementById('gpa-grade').textContent = gpaClassify(parseFloat(gpa));
-}
-function gpaClassify(g) {
-  if (g >= 9.5) return 'S'; if (g >= 8.5) return 'A+'; if (g >= 7.5) return 'A';
-  if (g >= 6.5) return 'B+'; if (g >= 5.5) return 'B'; if (g >= 4.5) return 'C'; return 'F';
-}
-document.getElementById('btn-add-gpa-course')?.addEventListener('click', addGPARow);
+window.rmGPA = id => { gpaIds = gpaIds.filter(x=>x!==id); document.getElementById('gr'+id)?.remove(); };
 
-/* CGPA Rows */
-let semRows = [];
 function addSemRow() {
   const id = Date.now() + Math.random();
-  semRows.push(id);
-  const container = document.getElementById('cgpa-sems');
+  semIds.push(id);
+  const n = semIds.length;
   const div = document.createElement('div');
-  div.className = 'sem-row';
-  div.id = 'sem-row-' + id;
-  div.innerHTML = `
-    <input placeholder="Semester" class="sem-name" type="text" value="Sem ${semRows.length}"/>
-    <input placeholder="GPA" class="sem-gpa" type="number" step="0.01" min="0" max="10"/>
-    <input placeholder="Credits" class="sem-cr" type="number" min="1" value="20"/>
-    <button class="btn-row-del" onclick="removeSemRow(${id})"><i class="fa-solid fa-xmark"></i></button>
-  `;
-  container.appendChild(div);
+  div.className = 'sem-row'; div.id = 'sr' + id;
+  div.innerHTML = `<input type="text" value="Sem ${n}" placeholder="Semester"/>
+    <input type="number" step="0.01" min="0" max="10" placeholder="GPA"/>
+    <input type="number" min="1" value="20" placeholder="Credits"/>
+    <button class="btn-row-del" onclick="rmSem(${id})"><i class="fa-solid fa-xmark"></i></button>`;
+  document.getElementById('sem-rows')?.appendChild(div);
 }
-function removeSemRow(id) {
-  semRows = semRows.filter(r => r !== id);
-  document.getElementById('sem-row-' + id)?.remove();
-}
-function calcCGPA() {
-  let totalPoints = 0, totalCr = 0;
-  document.querySelectorAll('#cgpa-sems .sem-row').forEach(row => {
-    const gpa = parseFloat(row.querySelector('.sem-gpa').value) || 0;
-    const cr = parseFloat(row.querySelector('.sem-cr').value) || 0;
-    totalPoints += gpa * cr;
-    totalCr += cr;
+window.rmSem = id => { semIds = semIds.filter(x=>x!==id); document.getElementById('sr'+id)?.remove(); };
+
+function calcGPA() {
+  let pts = 0, cr = 0;
+  document.querySelectorAll('#gpa-rows .gpa-row').forEach(row => {
+    const g = row.querySelector('select').value;
+    const c = parseFloat(row.querySelectorAll('input')[1].value)||0;
+    pts += (VG[g]||0)*c; cr += c;
   });
-  if (totalCr === 0) { showToast('Add at least one semester.', 'error'); return; }
-  const cgpa = (totalPoints / totalCr).toFixed(2);
-  document.getElementById('cgpa-result').textContent = cgpa;
-  document.getElementById('cgpa-total-cr').textContent = totalCr;
-  const g = parseFloat(cgpa);
-  let cls = g >= 9 ? 'First Class with Distinction (S)' : g >= 8 ? 'First Class (A)' : g >= 6 ? 'Second Class (B)' : 'Pass';
+  if (!cr) { toast('Add at least one course.','error'); return; }
+  const gpa = (pts/cr).toFixed(2);
+  document.getElementById('gpa-val').textContent  = gpa;
+  document.getElementById('gpa-cr').textContent   = cr;
+  document.getElementById('gpa-grade').textContent = gpaCls(parseFloat(gpa));
+}
+function gpaCls(g) {
+  if(g>=9.5) return 'S'; if(g>=8.5) return 'A+'; if(g>=7.5) return 'A';
+  if(g>=6.5) return 'B+'; if(g>=5.5) return 'B'; if(g>=4.5) return 'C'; return 'F';
+}
+
+function calcCGPA() {
+  let pts = 0, cr = 0;
+  document.querySelectorAll('#sem-rows .sem-row').forEach(row => {
+    const inp = row.querySelectorAll('input');
+    const gpa = parseFloat(inp[1].value)||0;
+    const c   = parseFloat(inp[2].value)||0;
+    pts += gpa*c; cr += c;
+  });
+  if (!cr) { toast('Add at least one semester.','error'); return; }
+  const cgpa = (pts/cr).toFixed(2);
+  const cls = cgpa>=9?'Distinction':cgpa>=8?'First Class':cgpa>=6?'Second Class':'Pass';
+  document.getElementById('cgpa-val').textContent   = cgpa;
+  document.getElementById('cgpa-cr').textContent    = cr;
   document.getElementById('cgpa-class').textContent = cls;
 }
-document.getElementById('btn-add-sem')?.addEventListener('click', addSemRow);
 
-/* Grade Predictor */
 function calcPredictor() {
-  const curr = parseFloat(document.getElementById('pred-curr').value);
-  const doneCr = parseFloat(document.getElementById('pred-done-cr').value);
+  const curr   = parseFloat(document.getElementById('pred-curr').value);
+  const done   = parseFloat(document.getElementById('pred-done').value);
   const target = parseFloat(document.getElementById('pred-target').value);
-  const remCr = parseFloat(document.getElementById('pred-rem-cr').value);
-  if ([curr, doneCr, target, remCr].some(isNaN) || remCr <= 0) {
-    showToast('Please fill all fields correctly.', 'error'); return;
-  }
-  const needed = ((target * (doneCr + remCr)) - (curr * doneCr)) / remCr;
-  const box = document.getElementById('pred-result-box');
-  const val = document.getElementById('pred-res-val');
-  const msg = document.getElementById('pred-res-msg');
+  const left   = parseFloat(document.getElementById('pred-left').value);
+  if ([curr,done,target,left].some(isNaN)||left<=0) { toast('Fill all fields.','error'); return; }
+  const needed = ((target*(done+left)) - (curr*done)) / left;
+  const box = document.getElementById('pred-result');
   box.classList.remove('hidden');
-  if (needed > 10) {
-    val.textContent = 'N/A';
-    msg.textContent = 'Target is not achievable with current CGPA and credits.';
-  } else if (needed < 0) {
-    val.textContent = '—';
-    msg.textContent = 'You have already achieved your target CGPA! 🎉';
+  if (needed>10) {
+    document.getElementById('pred-big').textContent = 'N/A';
+    document.getElementById('pred-msg').textContent = 'Target not achievable. Consider revising.';
+  } else if (needed<0) {
+    document.getElementById('pred-big').textContent = '—';
+    document.getElementById('pred-msg').textContent = 'You\'ve already hit your target! 🎉';
   } else {
-    val.textContent = needed.toFixed(2);
-    msg.textContent = needed >= 9 ? 'Very challenging! You need near-perfect grades.' :
-      needed >= 7 ? 'Achievable with consistent effort.' : 'Well within reach. Keep it up!';
+    document.getElementById('pred-big').textContent = needed.toFixed(2);
+    document.getElementById('pred-msg').textContent =
+      needed>=9 ? 'Very challenging — near-perfect marks needed.' :
+      needed>=7 ? 'Achievable with consistent effort.' : 'Well within reach!';
   }
 }
 
-/* ══════════════════════════════════════════════════════════
-   NPTEL PRACTICE
-   ══════════════════════════════════════════════════════════ */
-const NPTEL_COURSES = [
-  { id:'ds', name:'Data Science for Engineers', emoji:'📊', weeks:12, qs:480 },
-  { id:'dbms', name:'Database Management Systems', emoji:'🗄️', weeks:8, qs:320 },
-  { id:'cn', name:'Computer Networks', emoji:'🌐', weeks:10, qs:400 },
-  { id:'os', name:'Operating Systems', emoji:'💾', weeks:10, qs:400 },
-  { id:'dsa', name:'Data Structures & Algorithms', emoji:'🌳', weeks:12, qs:480 },
-  { id:'ml', name:'Machine Learning', emoji:'🤖', weeks:12, qs:480 },
-  { id:'dl', name:'Deep Learning', emoji:'🧠', weeks:8, qs:320 },
-  { id:'nlp', name:'Natural Language Processing', emoji:'💬', weeks:8, qs:320 },
-  { id:'cv', name:'Computer Vision', emoji:'👁️', weeks:8, qs:320 },
-  { id:'cloud', name:'Cloud Computing', emoji:'☁️', weeks:8, qs:320 },
-  { id:'cyber', name:'Cyber Security', emoji:'🔐', weeks:10, qs:400 },
-  { id:'ai', name:'Introduction to AI', emoji:'🤖', weeks:8, qs:320 },
-  { id:'iot', name:'Internet of Things', emoji:'📡', weeks:8, qs:320 },
-  { id:'bc', name:'Blockchain Technology', emoji:'⛓️', weeks:8, qs:320 },
-  { id:'python', name:'Programming in Python', emoji:'🐍', weeks:8, qs:320 },
-  { id:'java', name:'Programming in Java', emoji:'☕', weeks:8, qs:320 },
-  { id:'c', name:'Programming in C', emoji:'🖥️', weeks:8, qs:320 },
-  { id:'se', name:'Software Engineering', emoji:'🔧', weeks:8, qs:320 },
-  { id:'toc', name:'Theory of Computation', emoji:'∑', weeks:8, qs:320 },
-  { id:'cd', name:'Compiler Design', emoji:'⚙️', weeks:8, qs:320 },
-  { id:'coa', name:'Computer Organisation & Architecture', emoji:'🏗️', weeks:10, qs:400 },
-  { id:'dld', name:'Digital Logic Design', emoji:'🔌', weeks:8, qs:320 },
-  { id:'maths', name:'Discrete Mathematics', emoji:'📐', weeks:8, qs:320 },
-  { id:'prob', name:'Probability & Statistics', emoji:'📈', weeks:8, qs:320 },
-  { id:'la', name:'Linear Algebra', emoji:'🔢', weeks:6, qs:240 },
+document.getElementById('add-gpa-row')?.addEventListener('click', addGPARow);
+document.getElementById('add-sem-row')?.addEventListener('click', addSemRow);
+
+/* ══════════════════════════════════════════════════════
+   NPTEL
+══════════════════════════════════════════════════════ */
+const COURSES = [
+  {id:'ds',  name:'Data Science for Engineers',          emoji:'📊', weeks:12},
+  {id:'dbms',name:'Database Management Systems',         emoji:'🗄️', weeks:8},
+  {id:'cn',  name:'Computer Networks',                   emoji:'🌐', weeks:10},
+  {id:'os',  name:'Operating Systems',                   emoji:'💾', weeks:10},
+  {id:'dsa', name:'Data Structures & Algorithms',        emoji:'🌳', weeks:12},
+  {id:'ml',  name:'Machine Learning',                    emoji:'🤖', weeks:12},
+  {id:'dl',  name:'Deep Learning',                       emoji:'🧠', weeks:8},
+  {id:'nlp', name:'Natural Language Processing',         emoji:'💬', weeks:8},
+  {id:'cv',  name:'Computer Vision',                     emoji:'👁️', weeks:8},
+  {id:'cloud',name:'Cloud Computing',                    emoji:'☁️', weeks:8},
+  {id:'sec', name:'Cyber Security',                      emoji:'🔐', weeks:10},
+  {id:'ai',  name:'Introduction to AI',                  emoji:'🤖', weeks:8},
+  {id:'iot', name:'Internet of Things',                  emoji:'📡', weeks:8},
+  {id:'bc',  name:'Blockchain Technology',               emoji:'⛓️', weeks:8},
+  {id:'py',  name:'Programming in Python',               emoji:'🐍', weeks:8},
+  {id:'java',name:'Programming in Java',                 emoji:'☕', weeks:8},
+  {id:'c',   name:'Programming in C',                    emoji:'🖥️', weeks:8},
+  {id:'se',  name:'Software Engineering',                emoji:'🔧', weeks:8},
+  {id:'toc', name:'Theory of Computation',               emoji:'∑',  weeks:8},
+  {id:'cd',  name:'Compiler Design',                     emoji:'⚙️', weeks:8},
+  {id:'coa', name:'Computer Organisation & Architecture',emoji:'🏗️', weeks:10},
+  {id:'dld', name:'Digital Logic Design',                emoji:'🔌', weeks:8},
+  {id:'dm',  name:'Discrete Mathematics',                emoji:'📐', weeks:8},
+  {id:'prob',name:'Probability & Statistics',            emoji:'📈', weeks:8},
+  {id:'la',  name:'Linear Algebra',                      emoji:'🔢', weeks:6},
 ];
 
-// Sample questions generator
-function genQuestions(courseId, week) {
-  return [
-    {
-      q: `Which of the following best describes the core concept studied in Week ${week} of ${courseId.toUpperCase()}?`,
-      options: ['Option A — Foundational principle', 'Option B — Advanced derivation', 'Option C — Applied technique', 'Option D — Historical context'],
-      ans: 0,
-    },
-    {
-      q: `A key algorithm discussed in this topic has a time complexity of:`,
-      options: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
-      ans: 2,
-    },
-    {
-      q: `Which statement about this week's concept is TRUE?`,
-      options: ['It applies only to theoretical problems', 'It was developed in the 1990s', 'It is widely used in modern systems', 'It has no practical applications'],
-      ans: 2,
-    },
-  ];
-}
-
-let currentCourse = null;
-let quizMode = 'week';
+let activeCourse = null, quizMode = 'week';
 
 function renderNptelGrid(list) {
-  const grid = document.getElementById('nptel-grid');
-  if (!grid) return;
-  grid.innerHTML = list.map(c => `
-    <div class="nptel-card" onclick="openNptelCourse('${c.id}')">
-      <div class="nptel-card-emoji">${c.emoji}</div>
-      <div class="nptel-card-name">${c.name}</div>
-      <div class="nptel-card-meta">${c.weeks} weeks · ${c.qs}+ questions</div>
-    </div>
-  `).join('');
+  document.getElementById('nptel-grid').innerHTML = list.map(c => `
+    <div class="nptel-card" onclick="openCourse('${c.id}')">
+      <div class="nc-emoji">${c.emoji}</div>
+      <div class="nc-name">${c.name}</div>
+      <div class="nc-meta">${c.weeks} weeks · ${c.weeks*40}+ questions</div>
+    </div>`).join('');
 }
 
-function filterNptel() {
+window.filterNptel = () => {
   const q = document.getElementById('nptel-search').value.toLowerCase();
-  renderNptelGrid(NPTEL_COURSES.filter(c => c.name.toLowerCase().includes(q)));
-}
+  renderNptelGrid(COURSES.filter(c => c.name.toLowerCase().includes(q)));
+};
 
-function openNptelCourse(id) {
-  currentCourse = NPTEL_COURSES.find(c => c.id === id);
-  if (!currentCourse) return;
-  document.getElementById('nptel-home').classList.add('hidden');
-  document.getElementById('nptel-quiz-view').classList.remove('hidden');
-  document.getElementById('quiz-course-title').textContent = currentCourse.emoji + ' ' + currentCourse.name;
-  setQuizMode('week');
-}
+window.openCourse = id => {
+  activeCourse = COURSES.find(c => c.id===id);
+  if (!activeCourse) return;
+  document.getElementById('nptel-home-view').classList.add('hidden');
+  document.getElementById('nptel-quiz').classList.remove('hidden');
+  document.getElementById('quiz-title').textContent = activeCourse.emoji + ' ' + activeCourse.name;
+  setMode('week');
+};
 
-function closeNptelQuiz() {
-  document.getElementById('nptel-home').classList.remove('hidden');
-  document.getElementById('nptel-quiz-view').classList.add('hidden');
-  currentCourse = null;
-}
+window.backToNptel = () => {
+  document.getElementById('nptel-home-view').classList.remove('hidden');
+  document.getElementById('nptel-quiz').classList.add('hidden');
+  activeCourse = null;
+};
 
-function setQuizMode(mode) {
+window.setMode = mode => {
   quizMode = mode;
-  document.getElementById('qm-week').classList.toggle('active', mode === 'week');
-  document.getElementById('qm-full').classList.toggle('active', mode === 'full');
+  document.getElementById('qm-week').classList.toggle('active', mode==='week');
+  document.getElementById('qm-full').classList.toggle('active', mode==='full');
   renderQuiz();
+};
+
+function genQ(id, w) {
+  return [
+    { q:`In Week ${w}, which best characterises the core technique in ${id.toUpperCase()}?`,
+      opts:['Option A — Theoretical foundation','Option B — Algorithmic derivation','Option C — Applied optimisation','Option D — Historical context'], a:2 },
+    { q:`What is the typical time complexity of the primary algorithm covered this week?`,
+      opts:['O(1)','O(log n)','O(n)','O(n²)'], a:2 },
+    { q:`Which statement about this week\'s concept is TRUE?`,
+      opts:['It applies only to theory','It was proposed in the 1990s','It is widely used in modern systems','It has no real-world application'], a:2 },
+  ];
 }
 
 function renderQuiz() {
   const body = document.getElementById('quiz-body');
-  if (!currentCourse || !body) return;
-
-  const weeks = quizMode === 'week' ? currentCourse.weeks : 1;
-  const allQ = quizMode === 'full'
-    ? Array.from({length: currentCourse.weeks}, (_,w) => genQuestions(currentCourse.id, w+1)).flat().slice(0, 20)
-    : null;
-
+  if (!activeCourse || !body) return;
   body.innerHTML = '';
-
-  if (quizMode === 'week') {
-    for (let w = 1; w <= currentCourse.weeks; w++) {
-      const section = document.createElement('div');
-      section.className = 'quiz-week-section';
-      section.innerHTML = `<div class="quiz-week-label">Week ${w}</div>`;
-      genQuestions(currentCourse.id, w).forEach((q, qi) => {
-        section.appendChild(buildQuestionEl(q, `${currentCourse.id}-w${w}-q${qi}`));
-      });
-      body.appendChild(section);
+  if (quizMode==='week') {
+    for (let w=1; w<=activeCourse.weeks; w++) {
+      const sec = document.createElement('div'); sec.className = 'quiz-week';
+      sec.innerHTML = `<div class="week-label">Week ${w}</div>`;
+      genQ(activeCourse.id, w).forEach((q,qi) => sec.appendChild(buildQ(q, `${activeCourse.id}-w${w}-q${qi}`)));
+      body.appendChild(sec);
     }
   } else {
-    allQ.forEach((q, qi) => body.appendChild(buildQuestionEl(q, `${currentCourse.id}-full-q${qi}`)));
+    const all = [];
+    for (let w=1; w<=activeCourse.weeks; w++) all.push(...genQ(activeCourse.id,w));
+    all.slice(0,20).forEach((q,qi) => body.appendChild(buildQ(q, `${activeCourse.id}-full-q${qi}`)));
   }
-
-  document.getElementById('quiz-ext-link').innerHTML =
-    `<i class="fa-solid fa-circle-info"></i> Questions are representative samples. For official NPTEL content visit <a href="https://swayam.gov.in" target="_blank">swayam.gov.in</a>.`;
+  const note = document.createElement('div'); note.className='quiz-note';
+  note.innerHTML = `Questions are representative samples. Official NPTEL content at <a href="https://swayam.gov.in" target="_blank">swayam.gov.in</a>.`;
+  body.appendChild(note);
 }
 
-function buildQuestionEl(q, key) {
-  const div = document.createElement('div');
-  div.className = 'quiz-q';
-  div.innerHTML = `<div class="quiz-q-text">${q.q}</div><div class="quiz-options"></div>`;
-  const opts = div.querySelector('.quiz-options');
-  const letters = ['A','B','C','D'];
-  q.options.forEach((opt, i) => {
-    const btn = document.createElement('div');
-    btn.className = 'quiz-opt';
-    btn.innerHTML = `<span class="quiz-opt-letter">${letters[i]}</span> ${opt}`;
+function buildQ(q, key) {
+  const div = document.createElement('div'); div.className = 'quiz-q-card';
+  div.innerHTML = `<div class="q-text">${q.q}</div><div class="q-opts"></div>`;
+  const opts = div.querySelector('.q-opts');
+  ['A','B','C','D'].forEach((ltr,i) => {
+    const btn = document.createElement('div'); btn.className = 'q-opt';
+    btn.innerHTML = `<span class="q-opt-ltr">${ltr}</span>${q.opts[i]}`;
     btn.onclick = () => {
-      opts.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('correct','wrong'));
-      if (i === q.ans) {
-        btn.classList.add('correct');
-        showToast('Correct! ✅', 'success');
-      } else {
-        btn.classList.add('wrong');
-        opts.children[q.ans].classList.add('correct');
-        showToast('Incorrect. Try again!', 'error');
-      }
+      opts.querySelectorAll('.q-opt').forEach(b => b.classList.remove('correct','wrong'));
+      btn.classList.add(i===q.a ? 'correct' : 'wrong');
+      if (i!==q.a) opts.children[q.a].classList.add('correct');
+      toast(i===q.a ? 'Correct! ✅' : 'Wrong — correct answer highlighted.', i===q.a?'success':'error');
     };
     opts.appendChild(btn);
   });
   return div;
 }
 
-/* ══════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    PYQ PAPERS
-   ══════════════════════════════════════════════════════════ */
-const PYQ_SUBJECTS = [
+══════════════════════════════════════════════════════ */
+const SUBJECTS = [
   'Mathematics-I','Mathematics-II','Engineering Physics','Engineering Chemistry',
-  'Problem Solving and OOP','Data Structures & Algorithms','Database Management Systems',
-  'Operating Systems','Computer Networks','Software Engineering','Computer Organisation',
-  'Theory of Computation','Compiler Design','Digital Logic Design','Discrete Mathematics',
-  'Machine Learning','Artificial Intelligence','Computer Vision','Natural Language Processing',
-  'Cloud Computing','Cyber Security','IoT','Blockchain','Engineering Mechanics','Thermodynamics',
+  'Problem Solving & OOP','Data Structures','Database Management','Operating Systems',
+  'Computer Networks','Software Engineering','Computer Organisation','Theory of Computation',
+  'Compiler Design','Digital Logic','Discrete Mathematics','Machine Learning',
+  'Artificial Intelligence','Computer Vision','NLP','Cloud Computing',
+  'Cyber Security','IoT','Blockchain','Thermodynamics','Engineering Mechanics',
 ];
-const EXAM_TYPES = ['CAT1','CAT2','FAT'];
-const YEARS = [2021, 2022, 2023, 2024];
-
-// Generate a fixed fake list of PYQ papers
-const PYQ_PAPERS = [];
+const TYPES = ['CAT1','CAT2','FAT'];
+const YEARS = [2021,2022,2023,2024];
+const PAPERS = [];
 let _pid = 1;
-YEARS.forEach(yr => {
-  EXAM_TYPES.forEach(et => {
-    PYQ_SUBJECTS.forEach((sub, si) => {
-      PYQ_PAPERS.push({
-        id: _pid++,
-        subject: sub,
-        code: `CSE${1001 + si}`,
-        type: et,
-        year: yr,
-      });
-    });
-  });
-});
+YEARS.forEach(yr => TYPES.forEach(tp => SUBJECTS.forEach((s,i) => {
+  PAPERS.push({ id:_pid++, subj:s, code:`CSE${1001+i}`, type:tp, year:yr });
+})));
 
-let pyqFilterType = 'all', pyqFilterYear = 'all', pyqSearch = '';
+let pType='all', pYear='all', pQ='';
 
-function filterPYQ() {
-  pyqSearch = document.getElementById('pyq-search').value.toLowerCase();
-  renderPYQ();
-}
+window.filterPYQ = () => { pQ = document.getElementById('pyq-search').value.toLowerCase(); renderPYQ(); };
 
 function renderPYQ() {
+  let list = PAPERS;
+  if (pType!=='all') list = list.filter(p=>p.type===pType);
+  if (pYear!=='all') list = list.filter(p=>p.year===parseInt(pYear));
+  if (pQ) list = list.filter(p=>p.subj.toLowerCase().includes(pQ)||p.code.toLowerCase().includes(pQ));
   const grid = document.getElementById('pyq-grid');
-  if (!grid) return;
-  let list = PYQ_PAPERS;
-  if (pyqFilterType !== 'all') list = list.filter(p => p.type === pyqFilterType);
-  if (pyqFilterYear !== 'all') list = list.filter(p => p.year === parseInt(pyqFilterYear));
-  if (pyqSearch) list = list.filter(p => p.subject.toLowerCase().includes(pyqSearch) || p.code.toLowerCase().includes(pyqSearch));
-
-  const shown = list.slice(0, 60); // cap at 60 for perf
-  grid.innerHTML = shown.map(p => `
-    <div class="pyq-card" onclick="openPaperLink('${p.code}','${p.subject}','${p.type}','${p.year}')">
-      <div class="pyq-card-top">
-        <span class="pyq-badge-type ${p.type.toLowerCase()}">${p.type}</span>
-        <span class="pyq-year">${p.year}</span>
-      </div>
-      <div class="pyq-card-title">${p.subject}</div>
-      <div class="pyq-card-code">${p.code}</div>
-      <div class="pyq-card-footer">
-        <span class="pyq-view-btn"><i class="fa-solid fa-file-pdf"></i> View Paper</span>
-        <span style="font-size:0.75rem;color:var(--muted)">PDF</span>
-      </div>
-    </div>
-  `).join('');
-
-  if (shown.length === 0) grid.innerHTML = '<p style="color:var(--muted);padding:40px;text-align:center;">No papers found for selected filters.</p>';
+  const shown = list.slice(0,64);
+  grid.innerHTML = shown.length
+    ? shown.map(p => `<div class="pyq-card" onclick="window.open('https://papers.codechefvit.com','_blank')">
+        <div class="pyq-card-top">
+          <span class="pyq-type t-${p.type.toLowerCase()}">${p.type}</span>
+          <span class="pyq-year">${p.year}</span>
+        </div>
+        <div class="pyq-subj">${p.subj}</div>
+        <div class="pyq-code">${p.code}</div>
+        <div class="pyq-card-foot">
+          <span class="pyq-view"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open paper</span>
+          <span style="font-size:.7rem;color:var(--muted)">PDF</span>
+        </div>
+      </div>`).join('')
+    : '<p style="color:var(--muted);padding:36px;text-align:center">No papers for selected filters.</p>';
 }
 
-function openPaperLink(code, subject, type, year) {
-  // Redirect to CodeChef VIT papers (open source VIT paper archive)
-  const url = `https://www.papers.codechefvit.com/`;
-  window.open(url, '_blank', 'noopener');
-  showToast(`Opening ${subject} ${type} ${year}...`, 'info');
-}
-
-// PYQ filter buttons
 document.getElementById('pf-type')?.addEventListener('click', e => {
-  const btn = e.target.closest('.pf-btn');
-  if (!btn) return;
-  document.querySelectorAll('#pf-type .pf-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  pyqFilterType = btn.dataset.val;
-  renderPYQ();
+  const b = e.target.closest('.fb'); if(!b) return;
+  document.querySelectorAll('#pf-type .fb').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); pType = b.dataset.v; renderPYQ();
 });
 document.getElementById('pf-year')?.addEventListener('click', e => {
-  const btn = e.target.closest('.pf-btn');
-  if (!btn) return;
-  document.querySelectorAll('#pf-year .pf-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  pyqFilterYear = btn.dataset.val;
-  renderPYQ();
+  const b = e.target.closest('.fb'); if(!b) return;
+  document.querySelectorAll('#pf-year .fb').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); pYear = b.dataset.v; renderPYQ();
 });
 
-/* ══════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    INIT
-   ══════════════════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   buildTimetable();
-  renderCourseList();
-  renderNptelGrid(NPTEL_COURSES);
+  renderList();
+  renderNptelGrid(COURSES);
   renderPYQ();
-
-  // Add initial GPA and CGPA rows
   addGPARow(); addGPARow();
   addSemRow(); addSemRow();
 });
